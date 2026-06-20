@@ -1,0 +1,12 @@
+bin/
+obj/
+.vs/
+*.user
+*.suo
+*.cache
+.DS_Store
+*.swp
+*.swo
+.vscode/settings.json
+.idea/
+*.log
