@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Text.RegularExpressions;
 
 namespace BarterPOS
 {
@@ -21,11 +22,114 @@ namespace BarterPOS
 
         private void Register_Click(object sender, RoutedEventArgs e)
         {
+            // Validate all required fields
+            string validationError = ValidateRegistrationForm();
+            
+            if (!string.IsNullOrEmpty(validationError))
+            {
+                MessageBox.Show(validationError, "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
             // Demo mode - account creation doesn't actually do anything
             MessageBox.Show("Account created successfully! You can now sign in.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
             
-            // Switch back to login
+            // Clear form and switch back to login
+            ClearRegistrationForm();
             SwitchToLogin();
+        }
+
+        private string ValidateRegistrationForm()
+        {
+            // Employee ID validation
+            if (string.IsNullOrWhiteSpace(RegisterEmployeeID.Text))
+            {
+                return "Employee ID is required.";
+            }
+
+            // Full Name validation
+            if (string.IsNullOrWhiteSpace(RegisterFullName.Text))
+            {
+                return "Full Name is required.";
+            }
+
+            // Email validation
+            if (string.IsNullOrWhiteSpace(RegisterEmail.Text))
+            {
+                return "Email is required.";
+            }
+
+            if (!IsValidEmail(RegisterEmail.Text))
+            {
+                return "Please enter a valid email address.";
+            }
+
+            // Role validation
+            if (RegisterRole.SelectedIndex == 0 || RegisterRole.SelectedValue == null)
+            {
+                return "Please select a valid role.";
+            }
+
+            // Username validation
+            if (string.IsNullOrWhiteSpace(RegisterUsername.Text))
+            {
+                return "Username is required.";
+            }
+
+            if (RegisterUsername.Text.Length < 3)
+            {
+                return "Username must be at least 3 characters long.";
+            }
+
+            // Password validation
+            if (string.IsNullOrWhiteSpace(RegisterPassword.Password))
+            {
+                return "Password is required.";
+            }
+
+            if (RegisterPassword.Password.Length < 6)
+            {
+                return "Password must be at least 6 characters long.";
+            }
+
+            // Confirm Password validation
+            if (RegisterConfirmPassword.Password != RegisterPassword.Password)
+            {
+                return "Passwords do not match.";
+            }
+
+            // Terms and Conditions validation
+            if (!RegisterTermsCheckbox.IsChecked.HasValue || !RegisterTermsCheckbox.IsChecked.Value)
+            {
+                return "You must agree to the Terms and Conditions.";
+            }
+
+            return string.Empty; // No errors
+        }
+
+        private bool IsValidEmail(string email)
+        {
+            try
+            {
+                var addr = new System.Net.Mail.MailAddress(email);
+                return addr.Address == email;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private void ClearRegistrationForm()
+        {
+            RegisterEmployeeID.Text = string.Empty;
+            RegisterFullName.Text = string.Empty;
+            RegisterEmail.Text = string.Empty;
+            RegisterRole.SelectedIndex = 0;
+            RegisterUsername.Text = string.Empty;
+            RegisterPassword.Clear();
+            RegisterConfirmPassword.Clear();
+            RegisterTermsCheckbox.IsChecked = false;
         }
 
         private void Toggle_Click(object sender, RoutedEventArgs e)
