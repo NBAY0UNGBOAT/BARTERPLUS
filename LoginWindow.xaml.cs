@@ -1,5 +1,7 @@
-using System.Windows;
-using System.Text.RegularExpressions;
+﻿using System.Windows;
+using System.Windows.Controls;
+using BarterPOS.Models;
+using BarterPOS.Services;
 
 namespace BarterPOS
 {
@@ -14,7 +16,25 @@ namespace BarterPOS
 
         private void SignIn_Click(object sender, RoutedEventArgs e)
         {
-            // Demo mode - no authentication required
+            string username = LoginUsername.Text.Trim();
+            string password = LoginPassword.Password;
+
+            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+            {
+                MessageBox.Show("Please enter both username and password.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            bool success = UserStore.Repository.ValidateCredentials(username, password, out User? user, out string error);
+
+            if (!success || user == null)
+            {
+                MessageBox.Show(error, "Sign In Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            Session.CurrentUser = user;
+
             MainWindow mainWindow = new MainWindow();
             mainWindow.Show();
             this.Close();
@@ -22,38 +42,51 @@ namespace BarterPOS
 
         private void Register_Click(object sender, RoutedEventArgs e)
         {
-            // Validate all required fields
             string validationError = ValidateRegistrationForm();
-            
+
             if (!string.IsNullOrEmpty(validationError))
             {
                 MessageBox.Show(validationError, "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            // Demo mode - account creation doesn't actually do anything
+            string role = ((ComboBoxItem)RegisterRole.SelectedItem).Content.ToString() ?? "Employee";
+
+            var newUser = new User
+            {
+                EmployeeID = RegisterEmployeeID.Text.Trim(),
+                FullName = RegisterFullName.Text.Trim(),
+                Email = RegisterEmail.Text.Trim(),
+                Username = RegisterUsername.Text.Trim(),
+                Role = role
+            };
+
+            bool created = UserStore.Repository.Register(newUser, RegisterPassword.Password, out string error);
+
+            if (!created)
+            {
+                MessageBox.Show(error, "Registration Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
             MessageBox.Show("Account created successfully! You can now sign in.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
-            
-            // Clear form and switch back to login
+
             ClearRegistrationForm();
             SwitchToLogin();
         }
 
         private string ValidateRegistrationForm()
         {
-            // Employee ID validation
             if (string.IsNullOrWhiteSpace(RegisterEmployeeID.Text))
             {
                 return "Employee ID is required.";
             }
 
-            // Full Name validation
             if (string.IsNullOrWhiteSpace(RegisterFullName.Text))
             {
                 return "Full Name is required.";
             }
 
-            // Email validation
             if (string.IsNullOrWhiteSpace(RegisterEmail.Text))
             {
                 return "Email is required.";
@@ -64,13 +97,11 @@ namespace BarterPOS
                 return "Please enter a valid email address.";
             }
 
-            // Role validation
             if (RegisterRole.SelectedIndex == 0 || RegisterRole.SelectedValue == null)
             {
                 return "Please select a valid role.";
             }
 
-            // Username validation
             if (string.IsNullOrWhiteSpace(RegisterUsername.Text))
             {
                 return "Username is required.";
@@ -81,7 +112,6 @@ namespace BarterPOS
                 return "Username must be at least 3 characters long.";
             }
 
-            // Password validation
             if (string.IsNullOrWhiteSpace(RegisterPassword.Password))
             {
                 return "Password is required.";
@@ -92,19 +122,17 @@ namespace BarterPOS
                 return "Password must be at least 6 characters long.";
             }
 
-            // Confirm Password validation
             if (RegisterConfirmPassword.Password != RegisterPassword.Password)
             {
                 return "Passwords do not match.";
             }
 
-            // Terms and Conditions validation
             if (!RegisterTermsCheckbox.IsChecked.HasValue || !RegisterTermsCheckbox.IsChecked.Value)
             {
                 return "You must agree to the Terms and Conditions.";
             }
 
-            return string.Empty; // No errors
+            return string.Empty;
         }
 
         private bool IsValidEmail(string email)

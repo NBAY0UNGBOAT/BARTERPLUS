@@ -91,19 +91,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\USER\\.nuget\\packages\\": {}
+    "C:\\Users\\Lobitana\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\USER\\Desktop\\BARTERPLUS\\BarterPOS.csproj",
+      "projectUniqueName": "D:\\Documents\\GitHub\\BARTERPLUS\\BarterPOS.csproj",
       "projectName": "BarterPOS",
-      "projectPath": "C:\\Users\\USER\\Desktop\\BARTERPLUS\\BarterPOS.csproj",
-      "packagesPath": "C:\\Users\\USER\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\USER\\Desktop\\BARTERPLUS\\obj\\",
+      "projectPath": "D:\\Documents\\GitHub\\BARTERPLUS\\BarterPOS.csproj",
+      "packagesPath": "C:\\Users\\Lobitana\\.nuget\\packages\\",
+      "outputPath": "D:\\Documents\\GitHub\\BARTERPLUS\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\USER\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\Lobitana\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0-windows"

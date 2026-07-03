@@ -1,0 +1,75 @@
+﻿<Window x:Class="BarterPOS.UserManagementWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:BarterPOS"
+        Title="Barter+ - User Management"
+        Height="700"
+        Width="1100"
+        WindowStartupLocation="CenterScreen"
+        Background="#F8FAFC">
+    <Window.Resources>
+        <local:StatusToBrushConverter x:Key="StatusToBrushConverter"/>
+        <local:ActiveToButtonLabelConverter x:Key="ActiveToButtonLabelConverter"/>
+        <local:ActiveToActionBrushConverter x:Key="ActiveToActionBrushConverter"/>
+    </Window.Resources>
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="200"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="0,0,0,20">
+            <TextBlock Text="Account Activation / Deactivation" FontSize="26" FontWeight="700" Foreground="#1E40AF"/>
+            <TextBlock Text="Activate or deactivate employee accounts to manage access based on employment status." FontSize="12" Foreground="#64748B" Margin="0,4,0,0"/>
+        </StackPanel>
+
+        <Border Grid.Row="1" Background="White" CornerRadius="12" Padding="16">
+            <DataGrid x:Name="UsersGrid" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeRows="False" IsReadOnly="True" HeadersVisibility="Column" GridLinesVisibility="Horizontal" Background="White" RowHeight="44">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Employee ID" Binding="{Binding EmployeeID}" Width="110"/>
+                    <DataGridTextColumn Header="Full Name" Binding="{Binding FullName}" Width="*"/>
+                    <DataGridTextColumn Header="Username" Binding="{Binding Username}" Width="140"/>
+                    <DataGridTextColumn Header="Role" Binding="{Binding Role}" Width="110"/>
+                    <DataGridTemplateColumn Header="Status" Width="110">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border CornerRadius="10" Padding="10,4" HorizontalAlignment="Left" Background="{Binding IsActive, Converter={StaticResource StatusToBrushConverter}}">
+                                    <TextBlock Text="{Binding StatusDisplay}" Foreground="White" FontSize="11" FontWeight="600"/>
+                                </Border>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="Action" Width="150">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Content="{Binding IsActive, Converter={StaticResource ActiveToButtonLabelConverter}}" Click="ToggleStatus_Click" Tag="{Binding Id}" Padding="10,5" BorderThickness="0" Cursor="Hand" Foreground="White" Background="{Binding IsActive, Converter={StaticResource ActiveToActionBrushConverter}}">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+
+        <Border Grid.Row="2" Background="White" CornerRadius="12" Padding="16" Margin="0,16,0,0">
+            <StackPanel>
+                <TextBlock Text="RECENT ACTIVITY" FontSize="11" FontWeight="600" Foreground="#64748B" Margin="0,0,0,8"/>
+                <ListBox x:Name="AuditLogList" BorderThickness="0" Background="Transparent" MaxHeight="130">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding DisplayText}" FontSize="12" Foreground="#1E293B" Margin="0,3"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>
