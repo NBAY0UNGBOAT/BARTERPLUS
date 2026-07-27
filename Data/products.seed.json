@@ -1,0 +1,22 @@
+[
+  { "id": 1, "code": "100000000001", "name": "T-Shirt", "price": 399, "quantity": 1 },
+  { "id": 2, "code": "100000000002", "name": "Graphic T-Shirt", "price": 499, "quantity": 1 },
+  { "id": 3, "code": "100000000003", "name": "Polo Shirt", "price": 699, "quantity": 1 },
+  { "id": 4, "code": "100000000004", "name": "Long-Sleeve Shirt", "price": 799, "quantity": 1 },
+  { "id": 5, "code": "100000000005", "name": "Casual Shirt", "price": 899, "quantity": 1 },
+  { "id": 6, "code": "100000000006", "name": "Dress Shirt", "price": 1099, "quantity": 1 },
+  { "id": 7, "code": "100000000007", "name": "Hoodie", "price": 1299, "quantity": 1 },
+  { "id": 8, "code": "100000000008", "name": "Sweatshirt", "price": 999, "quantity": 1 },
+  { "id": 9, "code": "100000000009", "name": "Jacket", "price": 1499, "quantity": 1 },
+  { "id": 10, "code": "100000000010", "name": "Windbreaker", "price": 1299, "quantity": 1 },
+  { "id": 11, "code": "100000000011", "name": "Jeans", "price": 1199, "quantity": 1 },
+  { "id": 12, "code": "100000000012", "name": "Chino Pants", "price": 1099, "quantity": 1 },
+  { "id": 13, "code": "100000000013", "name": "Jogger Pants", "price": 899, "quantity": 1 },
+  { "id": 14, "code": "100000000014", "name": "Shorts", "price": 699, "quantity": 1 },
+  { "id": 15, "code": "100000000015", "name": "Cargo Shorts", "price": 799, "quantity": 1 },
+  { "id": 16, "code": "100000000016", "name": "Boxer Brief", "price": 249, "quantity": 1 },
+  { "id": 17, "code": "100000000017", "name": "Socks", "price": 149, "quantity": 1 },
+  { "id": 18, "code": "100000000018", "name": "Cap", "price": 499, "quantity": 1 },
+  { "id": 19, "code": "100000000019", "name": "Belt", "price": 599, "quantity": 1 },
+  { "id": 20, "code": "100000000020", "name": "Wallet", "price": 899, "quantity": 1 }
+]
