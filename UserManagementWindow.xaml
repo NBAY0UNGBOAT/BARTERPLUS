@@ -1,0 +1,135 @@
+<Window x:Class="BarterPOS.UserManagementWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:BarterPOS"
+        Title="Barter+ - Admin Dashboard"
+        Height="760"
+        Width="1280"
+        WindowStartupLocation="CenterScreen"
+        Background="#F8FAFC">
+    <Window.Resources>
+        <local:StatusToBrushConverter x:Key="StatusToBrushConverter"/>
+        <local:ActiveToButtonLabelConverter x:Key="ActiveToButtonLabelConverter"/>
+        <local:ActiveToActionBrushConverter x:Key="ActiveToActionBrushConverter"/>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Background="#1E40AF" Padding="24,18">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel>
+                    <TextBlock Text="ADMIN DASHBOARD" FontSize="28" FontWeight="700" Foreground="White"/>
+                    <TextBlock Text="Account access, permissions, activity, and staff performance" FontSize="12" Foreground="#DBEAFE" Margin="0,4,0,0"/>
+                </StackPanel>
+
+                <Button Grid.Column="1" Content="Logout" FontSize="13" FontWeight="600" Foreground="White" Background="#EA580C" Padding="14,8" BorderThickness="0" Cursor="Hand" Click="Logout_Click">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </Grid>
+        </Border>
+
+        <UniformGrid Grid.Row="1" Columns="4" Margin="24,20,24,0">
+            <Border Background="White" CornerRadius="8" Padding="18" Margin="0,0,12,0">
+                <StackPanel>
+                    <TextBlock Text="USERS" FontSize="11" FontWeight="700" Foreground="#64748B"/>
+                    <TextBlock x:Name="TotalUsersText" Text="0" FontSize="26" FontWeight="700" Foreground="#1E293B"/>
+                </StackPanel>
+            </Border>
+            <Border Background="White" CornerRadius="8" Padding="18" Margin="4,0,8,0">
+                <StackPanel>
+                    <TextBlock Text="ACTIVE" FontSize="11" FontWeight="700" Foreground="#64748B"/>
+                    <TextBlock x:Name="ActiveUsersText" Text="0" FontSize="26" FontWeight="700" Foreground="#059669"/>
+                </StackPanel>
+            </Border>
+            <Border Background="White" CornerRadius="8" Padding="18" Margin="8,0,4,0">
+                <StackPanel>
+                    <TextBlock Text="DISABLED" FontSize="11" FontWeight="700" Foreground="#64748B"/>
+                    <TextBlock x:Name="DisabledUsersText" Text="0" FontSize="26" FontWeight="700" Foreground="#DC2626"/>
+                </StackPanel>
+            </Border>
+            <Border Background="White" CornerRadius="8" Padding="18" Margin="12,0,0,0">
+                <StackPanel>
+                    <TextBlock Text="ADMINS" FontSize="11" FontWeight="700" Foreground="#64748B"/>
+                    <TextBlock x:Name="AdminUsersText" Text="0" FontSize="26" FontWeight="700" Foreground="#1E40AF"/>
+                </StackPanel>
+            </Border>
+        </UniformGrid>
+
+        <Border Grid.Row="2" Background="White" CornerRadius="8" Padding="16" Margin="24,20,24,24">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0" Margin="0,0,0,14">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="USER ACCOUNTS" FontSize="11" FontWeight="700" Foreground="#64748B"/>
+                        <TextBlock Text="Scroll horizontally to view full account details and actions." FontSize="12" Foreground="#64748B" Margin="0,3,0,0"/>
+                    </StackPanel>
+                    <Button Grid.Column="1" Content="Create User" Height="38" Padding="16,0" Background="#059669" Foreground="White" BorderThickness="0" FontWeight="600" Cursor="Hand" Click="CreateUser_Click"/>
+                </Grid>
+
+                <DataGrid Grid.Row="1" x:Name="UsersGrid" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeRows="False" IsReadOnly="True" HeadersVisibility="Column" GridLinesVisibility="Horizontal" Background="White" RowHeight="48" MouseDoubleClick="UsersGrid_MouseDoubleClick" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto" EnableColumnVirtualization="False">
+                <DataGrid.Resources>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="TextWrapping" Value="NoWrap"/>
+                        <Setter Property="TextTrimming" Value="None"/>
+                    </Style>
+                </DataGrid.Resources>
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Username" Binding="{Binding Username}" Width="170"/>
+                    <DataGridTextColumn Header="Permission" Binding="{Binding Role}" Width="130"/>
+                    <DataGridTextColumn Header="Employee ID" Binding="{Binding EmployeeID}" Width="150"/>
+                    <DataGridTextColumn Header="Employee Name" Binding="{Binding FullName}" Width="260"/>
+                    <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="260"/>
+                    <DataGridTextColumn Header="Contact Number" Binding="{Binding ContactNumber}" Width="170"/>
+                    <DataGridTextColumn Header="Last Activity" Binding="{Binding LastActivity}" Width="230"/>
+                    <DataGridTextColumn Header="Last Login" Binding="{Binding LastLoginDisplay}" Width="180"/>
+                    <DataGridTemplateColumn Header="Status" Width="110">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border CornerRadius="10" Padding="10,4" HorizontalAlignment="Left" Background="{Binding IsActive, Converter={StaticResource StatusToBrushConverter}}">
+                                    <TextBlock Text="{Binding StatusDisplay}" Foreground="White" FontSize="11" FontWeight="600"/>
+                                </Border>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="Actions" Width="560">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button Content="View / Edit" Click="ViewUser_Click" Tag="{Binding Id}" MinWidth="92" Padding="10,5" Margin="0,0,6,0" BorderThickness="0" Cursor="Hand" Background="#1E40AF" Foreground="White"/>
+                                    <Button Content="{Binding IsActive, Converter={StaticResource ActiveToButtonLabelConverter}}" Click="ToggleStatus_Click" Tag="{Binding Id}" MinWidth="118" Padding="10,5" Margin="0,0,6,0" BorderThickness="0" Cursor="Hand" Foreground="White" Background="{Binding IsActive, Converter={StaticResource ActiveToActionBrushConverter}}"/>
+                                    <Button Content="Reset Password" Click="ResetPassword_Click" Tag="{Binding Id}" MinWidth="126" Padding="10,5" Margin="0,0,6,0" BorderThickness="0" Cursor="Hand" Background="#334155" Foreground="White"/>
+                                    <Button Content="Change Permission" Click="ViewUser_Click" Tag="{Binding Id}" MinWidth="150" Padding="10,5" BorderThickness="0" Cursor="Hand" Background="#059669" Foreground="White"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
