@@ -10,4 +10,3 @@ obj/
 .vscode/settings.json
 .idea/
 *.log
-appsettings.Local.json

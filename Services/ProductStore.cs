@@ -1,5 +1,3 @@
-using System;
-
 namespace BarterPOS.Services
 {
     public static class ProductStore
@@ -8,15 +6,14 @@ namespace BarterPOS.Services
 
         private static IProductRepository CreateRepository()
         {
-            string? connectionString = Environment.GetEnvironmentVariable("BARTERPLUS_MONGO_CONNECTION");
-            string databaseName = Environment.GetEnvironmentVariable("BARTERPLUS_MONGO_DATABASE") ?? "BARTERPLUS";
+            MongoSettings mongoSettings = AppConfig.GetMongoSettings();
 
-            if (string.IsNullOrWhiteSpace(connectionString))
+            if (string.IsNullOrWhiteSpace(mongoSettings.ConnectionString))
             {
                 return new InMemoryProductRepository();
             }
 
-            return new MongoProductRepository(connectionString, databaseName);
+            return new MongoProductRepository(mongoSettings.ConnectionString, mongoSettings.DatabaseName);
         }
     }
 }
