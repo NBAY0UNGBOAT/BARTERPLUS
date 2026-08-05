@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("BarterPOS")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+088bbea94602459ea3c3aa2f5e573024af1654db")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+badfe3828ea058a621cb3d4c1ee26b571a2fdc80")]
 [assembly: System.Reflection.AssemblyProductAttribute("BarterPOS")]
 [assembly: System.Reflection.AssemblyTitleAttribute("BarterPOS")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
