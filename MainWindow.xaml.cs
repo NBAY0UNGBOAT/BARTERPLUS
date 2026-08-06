@@ -44,6 +44,16 @@ namespace BarterPOS
             window.ShowDialog();
         }
 
+        private void EndOfDayReconciliation_Click(object sender, RoutedEventArgs e)
+        {
+            var window = new EndOfDayReconciliationWindow
+            {
+                Owner = this
+            };
+
+            window.ShowDialog();
+        }
+
         private void ClearSale_Click(object sender, RoutedEventArgs e)
         {
             ViewModel?.ClearSale();

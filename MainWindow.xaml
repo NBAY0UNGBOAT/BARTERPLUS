@@ -321,7 +321,7 @@
         </Grid>
 
         <Border Grid.Row="2" Background="#1A1A2E" Padding="8">
-            <UniformGrid Columns="7" Margin="8">
+            <UniformGrid Columns="8" Margin="8">
                 <Button Background="{StaticResource PrimaryBlueBrush}" Style="{StaticResource FunctionButtonStyle}" Margin="3">
                     <StackPanel Orientation="Vertical">
                         <TextBlock Text="F1" FontSize="11" Foreground="White" TextAlignment="Center" Margin="0,0,0,3" FontWeight="700"/>
@@ -367,6 +367,13 @@
                     <StackPanel Orientation="Vertical">
                         <TextBlock Text="F7" FontSize="11" Foreground="White" TextAlignment="Center" Margin="0,0,0,3" FontWeight="700"/>
                         <TextBlock Text="Transactions" FontSize="10" Foreground="White" TextAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+
+                <Button Background="{StaticResource AccentGreenBrush}" Style="{StaticResource FunctionButtonStyle}" Margin="3" Click="EndOfDayReconciliation_Click">
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Text="F8" FontSize="11" Foreground="White" TextAlignment="Center" Margin="0,0,0,3" FontWeight="700"/>
+                        <TextBlock Text="End of Day" FontSize="10" Foreground="White" TextAlignment="Center"/>
                     </StackPanel>
                 </Button>
             </UniformGrid>

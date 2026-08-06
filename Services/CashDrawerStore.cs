@@ -45,6 +45,18 @@ namespace BarterPOS.Services
             }
         }
 
+        // NEW: exposes the raw entry list (read-only, ordered oldest-first) so callers such as
+        // End-of-Day reconciliation can filter/aggregate by date without duplicating file I/O.
+        public static List<CashDrawerEntry> GetEntries()
+        {
+            lock (FileLock)
+            {
+                return LoadAll()
+                    .OrderBy(e => e.Timestamp)
+                    .ToList();
+            }
+        }
+
         public static SaveSyncResult AddEntry(CashDrawerEntry entry)
         {
             if (entry == null)
