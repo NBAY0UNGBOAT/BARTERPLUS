@@ -4,6 +4,13 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace BarterPOS.Models
 {
+    public enum TransactionStatus
+    {
+        Completed,
+        Voided,
+        Refunded
+    }
+
     public class SaleTransaction
     {
         public string Id { get; set; } = Guid.NewGuid().ToString("N");
@@ -14,6 +21,7 @@ namespace BarterPOS.Models
         public string Cashier { get; set; } = string.Empty;
         public string CashierUsername { get; set; } = string.Empty;
         public string PaymentMethod { get; set; } = string.Empty;
+        public TransactionStatus Status { get; set; } = TransactionStatus.Completed;
         public List<SaleLineItem> Items { get; set; } = new();
         public int TotalItems { get; set; }
         public decimal GrossAmount { get; set; }

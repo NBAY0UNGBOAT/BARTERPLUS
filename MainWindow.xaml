@@ -321,7 +321,7 @@
         </Grid>
 
         <Border Grid.Row="2" Background="#1A1A2E" Padding="8">
-            <UniformGrid Columns="6" Margin="8">
+            <UniformGrid Columns="7" Margin="8">
                 <Button Background="{StaticResource PrimaryBlueBrush}" Style="{StaticResource FunctionButtonStyle}" Margin="3">
                     <StackPanel Orientation="Vertical">
                         <TextBlock Text="F1" FontSize="11" Foreground="White" TextAlignment="Center" Margin="0,0,0,3" FontWeight="700"/>
@@ -361,6 +361,12 @@
                     <StackPanel Orientation="Vertical">
                         <TextBlock Text="F6" FontSize="11" Foreground="White" TextAlignment="Center" Margin="0,0,0,3" FontWeight="700"/>
                         <TextBlock Text="Card" FontSize="10" Foreground="White" TextAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+                <Button Background="{StaticResource PrimaryBlueBrush}" Style="{StaticResource FunctionButtonStyle}" Margin="3" Click="TransactionHistory_Click">
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Text="F7" FontSize="11" Foreground="White" TextAlignment="Center" Margin="0,0,0,3" FontWeight="700"/>
+                        <TextBlock Text="Transactions" FontSize="10" Foreground="White" TextAlignment="Center"/>
                     </StackPanel>
                 </Button>
             </UniformGrid>

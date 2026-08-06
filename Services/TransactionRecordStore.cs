@@ -34,6 +34,16 @@ namespace BarterPOS.Services
             }
         }
 
+        public static List<SaleTransaction> GetTransactions()
+        {
+            lock (FileLock)
+            {
+                return LoadAll()
+                    .OrderByDescending(t => t.CompletedAt)
+                    .ToList();
+            }
+        }
+
         public static SaveSyncResult Save(SaleTransaction transaction)
         {
             if (transaction == null)
@@ -62,6 +72,21 @@ namespace BarterPOS.Services
                     ? "Transaction saved and synced."
                     : $"Transaction saved offline. {syncError}"
             };
+        }
+
+        public static void UpdateTransaction(SaleTransaction transaction)
+        {
+            if (transaction == null)
+            {
+                throw new ArgumentNullException(nameof(transaction));
+            }
+
+            lock (FileLock)
+            {
+                var transactions = LoadAll();
+                Upsert(transactions, transaction);
+                SaveAll(transactions);
+            }
         }
 
         public static SyncResult SyncPending()

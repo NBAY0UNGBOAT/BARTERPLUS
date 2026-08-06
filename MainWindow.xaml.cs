@@ -34,6 +34,16 @@ namespace BarterPOS
             window.ShowDialog();
         }
 
+        private void TransactionHistory_Click(object sender, RoutedEventArgs e)
+        {
+            var window = new TransactionHistoryWindow
+            {
+                Owner = this
+            };
+
+            window.ShowDialog();
+        }
+
         private void ClearSale_Click(object sender, RoutedEventArgs e)
         {
             ViewModel?.ClearSale();
