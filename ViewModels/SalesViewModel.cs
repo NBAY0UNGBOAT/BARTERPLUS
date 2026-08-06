@@ -18,6 +18,10 @@ namespace BarterPOS.ViewModels
         private string _barcodeInput = string.Empty;
         private string _currentDateTime = string.Empty;
         private string _deductionInput = string.Empty;
+        private string _syncStatusText = string.Empty;
+        private string _cashDrawerLastActivity = string.Empty;
+        private int _pendingSyncCount;
+        private decimal _cashDrawerBalance;
         private bool _isPwdDiscount;
         private bool _isSeniorDiscount;
         private DispatcherTimer? _dateTimeTimer;
@@ -159,18 +163,64 @@ namespace BarterPOS.ViewModels
 
         public ObservableCollection<Product> LineItems => _currentSale.Products;
 
+        public string SyncStatusText
+        {
+            get => _syncStatusText;
+            private set
+            {
+                if (_syncStatusText != value)
+                {
+                    _syncStatusText = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public int PendingSyncCount
+        {
+            get => _pendingSyncCount;
+            private set
+            {
+                if (_pendingSyncCount != value)
+                {
+                    _pendingSyncCount = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public decimal CashDrawerBalance
+        {
+            get => _cashDrawerBalance;
+            private set
+            {
+                if (_cashDrawerBalance != value)
+                {
+                    _cashDrawerBalance = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public string CashDrawerLastActivity
+        {
+            get => _cashDrawerLastActivity;
+            private set
+            {
+                if (_cashDrawerLastActivity != value)
+                {
+                    _cashDrawerLastActivity = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         public SalesViewModel()
         {
             try
             {
-                _currentSale = new Sale
-                {
-                    TransactionId = 1001,
-                    TerminalId = "POS-01",
-                    TransactionDate = DateTime.Now,
-                    Cashier = CashierName,
-                    Bagger = string.Empty
-                };
+                _currentSale = CreateSale(TransactionRecordStore.GetNextTransactionId());
+                RefreshOperationalState();
 
                 InitializeDateTimeTimer();
 
@@ -265,20 +315,176 @@ namespace BarterPOS.ViewModels
 
         public void ClearSale()
         {
-            _currentSale = new Sale
+            StartNewSale(_currentSale.TransactionId + 1);
+        }
+
+        public bool CompleteSale(string paymentMethod, out string message)
+        {
+            message = string.Empty;
+
+            if (!_currentSale.Products.Any())
             {
-                TransactionId = _currentSale.TransactionId + 1,
+                message = "Add at least one product before completing the transaction.";
+                return false;
+            }
+
+            decimal amountDue = AmountDue;
+            var transaction = new SaleTransaction
+            {
+                TransactionId = _currentSale.TransactionId,
                 TerminalId = _currentSale.TerminalId,
-                TransactionDate = DateTime.Now,
+                TransactionDate = _currentSale.TransactionDate,
+                CompletedAt = DateTime.Now,
                 Cashier = CashierName,
+                CashierUsername = Session.CurrentUser?.Username ?? string.Empty,
+                PaymentMethod = paymentMethod,
+                Items = _currentSale.Products.Select(product => new SaleLineItem
+                {
+                    Code = product.Code,
+                    Name = product.Name,
+                    UnitPrice = product.Price,
+                    Quantity = product.Quantity,
+                    Subtotal = product.Subtotal
+                }).ToList(),
+                TotalItems = TotalItems,
+                GrossAmount = TotalAmount,
+                PercentageDiscount = PercentageDiscount,
+                ManualDeduction = ManualDeduction,
+                NetAmount = amountDue,
+                AmountPaid = amountDue,
+                ChangeDue = 0m
             };
 
-            IsPwdDiscount = false;
-            IsSeniorDiscount = false;
-            DeductionInput = string.Empty;
+            SaveSyncResult transactionResult = TransactionRecordStore.Save(transaction);
+            string cashDrawerMessage = string.Empty;
+
+            if (paymentMethod.Equals("Cash", StringComparison.OrdinalIgnoreCase) && amountDue > 0m)
+            {
+                var drawerEntry = new CashDrawerEntry
+                {
+                    TerminalId = _currentSale.TerminalId,
+                    Cashier = CashierName,
+                    CashierUsername = Session.CurrentUser?.Username ?? string.Empty,
+                    Type = CashDrawerEntryTypes.CashSale,
+                    Amount = amountDue,
+                    Note = $"Cash payment for transaction #{_currentSale.TransactionId}",
+                    RelatedTransactionId = _currentSale.TransactionId
+                };
+
+                SaveSyncResult drawerResult = CashDrawerStore.AddEntry(drawerEntry);
+                cashDrawerMessage = Environment.NewLine + "Cash Drawer: " + drawerResult.Message;
+            }
+
+            message = BuildReceiptSummary(transaction, transactionResult.Message + cashDrawerMessage);
+            StartNewSale(TransactionRecordStore.GetNextTransactionId());
+            RefreshOperationalState();
+            return true;
+        }
+
+        public bool RecordCashMovement(string type, decimal amount, string note, out string message)
+        {
+            message = string.Empty;
+
+            if (amount <= 0m)
+            {
+                message = "Enter an amount greater than zero.";
+                return false;
+            }
+
+            var entry = new CashDrawerEntry
+            {
+                TerminalId = _currentSale.TerminalId,
+                Cashier = CashierName,
+                CashierUsername = Session.CurrentUser?.Username ?? string.Empty,
+                Type = type,
+                Amount = amount,
+                Note = note.Trim()
+            };
+
+            SaveSyncResult result = CashDrawerStore.AddEntry(entry);
+            RefreshOperationalState();
+            message = result.Message;
+            return true;
+        }
+
+        public string SyncOfflineData()
+        {
+            SyncResult transactionResult = TransactionRecordStore.SyncPending();
+            SyncResult drawerResult = CashDrawerStore.SyncPending();
+
+            RefreshOperationalState();
+
+            int totalPending = transactionResult.PendingBeforeSync + drawerResult.PendingBeforeSync;
+            int totalSynced = transactionResult.SyncedCount + drawerResult.SyncedCount;
+            int totalFailed = transactionResult.FailedCount + drawerResult.FailedCount;
+            string lastError = !string.IsNullOrWhiteSpace(transactionResult.LastError)
+                ? transactionResult.LastError
+                : drawerResult.LastError;
+
+            if (totalPending == 0)
+            {
+                return "No offline transactions or cash drawer entries are waiting to sync.";
+            }
+
+            if (totalFailed > 0)
+            {
+                return $"Synced {totalSynced} record(s). {totalFailed} record(s) are still pending. {lastError}";
+            }
+
+            return $"Synced {totalSynced} offline record(s) successfully.";
+        }
+
+        private Sale CreateSale(int transactionId)
+        {
+            return new Sale
+            {
+                TransactionId = transactionId,
+                TerminalId = "POS-01",
+                TransactionDate = DateTime.Now,
+                Cashier = CashierName,
+                Bagger = string.Empty
+            };
+        }
+
+        private void StartNewSale(int transactionId)
+        {
+            _currentSale = CreateSale(transactionId);
+            _isPwdDiscount = false;
+            _isSeniorDiscount = false;
+            _deductionInput = string.Empty;
 
             OnPropertyChanged(nameof(CurrentSale));
+            OnPropertyChanged(nameof(IsPwdDiscount));
+            OnPropertyChanged(nameof(IsSeniorDiscount));
+            OnPropertyChanged(nameof(DeductionInput));
             RefreshTotals();
+        }
+
+        private void RefreshOperationalState()
+        {
+            int pendingTransactions = TransactionRecordStore.GetPendingCount();
+            int pendingDrawerEntries = CashDrawerStore.GetPendingCount();
+
+            PendingSyncCount = pendingTransactions + pendingDrawerEntries;
+            SyncStatusText = MongoDatabaseFactory.IsConfigured
+                ? PendingSyncCount == 0
+                    ? "Online sync ready"
+                    : $"{PendingSyncCount} offline record(s) pending"
+                : $"{PendingSyncCount} local record(s) pending - MongoDB not configured";
+            CashDrawerBalance = CashDrawerStore.GetCurrentBalance();
+            CashDrawerLastActivity = CashDrawerStore.GetLastActivityText();
+        }
+
+        private string BuildReceiptSummary(SaleTransaction transaction, string syncMessage)
+        {
+            return $"Receipt #{transaction.TransactionId}" + Environment.NewLine
+                + $"Payment: {transaction.PaymentMethod}" + Environment.NewLine
+                + $"Items: {transaction.TotalItems}" + Environment.NewLine
+                + $"Subtotal: {transaction.GrossAmount:C}" + Environment.NewLine
+                + $"Discounts: {(transaction.PercentageDiscount + transaction.ManualDeduction):C}" + Environment.NewLine
+                + $"Total Paid: {transaction.NetAmount:C}" + Environment.NewLine
+                + Environment.NewLine
+                + syncMessage;
         }
 
         private void RefreshTotals()

@@ -79,6 +79,7 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0" Orientation="Vertical">
@@ -109,6 +110,22 @@
                            Margin="24,0,24,0"/>
 
                 <Button Grid.Column="3"
+                        Background="#DBEAFE"
+                        Foreground="{StaticResource PrimaryBlueBrush}"
+                        Padding="12,6"
+                        BorderThickness="0"
+                        Cursor="Hand"
+                        Margin="0,0,12,0"
+                        Click="SyncOffline_Click">
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Text="{Binding SyncStatusText, Mode=OneWay}" FontSize="{StaticResource FontSize.Small}" FontWeight="700" TextAlignment="Center"/>
+                        <TextBlock FontSize="10" TextAlignment="Center">
+                            <Run Text="Pending: "/><Run Text="{Binding PendingSyncCount, Mode=OneWay}"/>
+                        </TextBlock>
+                    </StackPanel>
+                </Button>
+
+                <Button Grid.Column="4"
                         x:Name="ManageUsersButton"
                         Content="Manage Users"
                         FontSize="{StaticResource FontSize.Normal}"
@@ -130,7 +147,7 @@
                     </Button.Template>
                 </Button>
 
-                <Button Grid.Column="4"
+                <Button Grid.Column="5"
                         Content="Logout"
                         FontSize="{StaticResource FontSize.Normal}"
                         FontWeight="600"
@@ -157,7 +174,8 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <StackPanel Grid.Column="0">
+            <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
                 <Border Background="White" CornerRadius="12" Padding="24" Effect="{StaticResource ShadowEffect}" Margin="0,0,0,20">
                     <StackPanel>
                         <StackPanel Orientation="Vertical" Margin="0,0,0,18">
@@ -215,7 +233,51 @@
                                    Margin="0,6,0,0"/>
                     </StackPanel>
                 </Border>
+
+                <Border Background="White" CornerRadius="12" Padding="24" Effect="{StaticResource ShadowEffect}" Margin="0,20,0,0">
+                    <StackPanel>
+                        <TextBlock Text="CASH DRAWER"
+                                   Foreground="{StaticResource TextMutedBrush}"
+                                   FontSize="{StaticResource FontSize.Small}"
+                                   FontWeight="600"
+                                   Margin="0,0,0,12"/>
+
+                        <TextBlock Text="{Binding CashDrawerBalance, Converter={StaticResource CurrencyConverter}, Mode=OneWay}"
+                                   FontSize="28"
+                                   FontWeight="700"
+                                   Foreground="{StaticResource AccentGreenBrush}"
+                                   Margin="0,0,0,6"/>
+
+                        <TextBlock Text="{Binding CashDrawerLastActivity, Mode=OneWay}"
+                                   Foreground="{StaticResource TextMutedBrush}"
+                                   FontSize="{StaticResource FontSize.Small}"
+                                   TextWrapping="Wrap"
+                                   Margin="0,0,0,16"/>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Button Grid.Column="0"
+                                    Content="Cash In"
+                                    Background="{StaticResource AccentGreenBrush}"
+                                    Style="{StaticResource FunctionButtonStyle}"
+                                    Margin="0,0,6,0"
+                                    Click="CashIn_Click"/>
+
+                            <Button Grid.Column="1"
+                                    Content="Cash Out"
+                                    Background="{StaticResource AccentOrangeBrush}"
+                                    Style="{StaticResource FunctionButtonStyle}"
+                                    Margin="6,0,0,0"
+                                    Click="CashOut_Click"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
             </StackPanel>
+            </ScrollViewer>
 
             <StackPanel Grid.Column="1" Margin="24,0,0,0">
                 <Border Background="White" CornerRadius="12" Padding="18" Effect="{StaticResource ShadowEffectLight}" Margin="0,0,0,16">
@@ -281,21 +343,21 @@
                     </StackPanel>
                 </Button>
 
-                <Button Background="{StaticResource AccentGreenBrush}" Style="{StaticResource FunctionButtonStyle}" Margin="3">
+                <Button Background="{StaticResource AccentGreenBrush}" Style="{StaticResource FunctionButtonStyle}" Margin="3" Click="ClearSale_Click">
                     <StackPanel Orientation="Vertical">
                         <TextBlock Text="F4" FontSize="11" Foreground="White" TextAlignment="Center" Margin="0,0,0,3" FontWeight="700"/>
                         <TextBlock Text="Clear Sale" FontSize="10" Foreground="White" TextAlignment="Center"/>
                     </StackPanel>
                 </Button>
 
-                <Button Background="{StaticResource AccentOrangeBrush}" Style="{StaticResource FunctionButtonStyle}" Margin="3">
+                <Button Background="{StaticResource AccentOrangeBrush}" Style="{StaticResource FunctionButtonStyle}" Margin="3" Click="CashPayment_Click">
                     <StackPanel Orientation="Vertical">
                         <TextBlock Text="F5" FontSize="11" Foreground="White" TextAlignment="Center" Margin="0,0,0,3" FontWeight="700"/>
                         <TextBlock Text="Cash" FontSize="10" Foreground="White" TextAlignment="Center"/>
                     </StackPanel>
                 </Button>
 
-                <Button Background="{StaticResource AccentOrangeBrush}" Style="{StaticResource FunctionButtonStyle}" Margin="3">
+                <Button Background="{StaticResource AccentOrangeBrush}" Style="{StaticResource FunctionButtonStyle}" Margin="3" Click="CardPayment_Click">
                     <StackPanel Orientation="Vertical">
                         <TextBlock Text="F6" FontSize="11" Foreground="White" TextAlignment="Center" Margin="0,0,0,3" FontWeight="700"/>
                         <TextBlock Text="Card" FontSize="10" Foreground="White" TextAlignment="Center"/>
