@@ -122,6 +122,63 @@ namespace BarterPOS.Services
             return result;
         }
 
+        public static bool RefundItems(
+            SaleTransaction transaction,
+            List<SaleLineItem> refundedItems)
+        {
+            if (transaction == null || refundedItems.Count == 0)
+            {
+                return false;
+            }
+
+            foreach (var refund in refundedItems)
+            {
+                var existingRefund = transaction.RefundedItems
+                    .FirstOrDefault(i => i.Code == refund.Code);
+
+                if (existingRefund == null)
+                {
+                    transaction.RefundedItems.Add(new SaleLineItem
+                    {
+                        Code = refund.Code,
+                        Name = refund.Name,
+                        UnitPrice = refund.UnitPrice,
+                        Quantity = refund.Quantity,
+                        Subtotal = refund.UnitPrice * refund.Quantity
+                    });
+                }
+                else
+                {
+                    existingRefund.Quantity += refund.Quantity;
+                    existingRefund.Subtotal =
+                        existingRefund.UnitPrice * existingRefund.Quantity;
+                }
+            }
+
+            bool fullyRefunded = true;
+
+            foreach (var item in transaction.Items)
+            {
+                int refundedQty = transaction.RefundedItems
+                    .Where(r => r.Code == item.Code)
+                    .Sum(r => r.Quantity);
+
+                if (refundedQty < item.Quantity)
+                {
+                    fullyRefunded = false;
+                    break;
+                }
+            }
+
+            transaction.Status = fullyRefunded
+                ? TransactionStatus.Refunded
+                : TransactionStatus.PartiallyRefunded;
+
+            UpdateTransaction(transaction);
+
+            return true;
+        }
+        
         private static bool TrySyncToMongo(SaleTransaction transaction, out string error)
         {
             error = string.Empty;

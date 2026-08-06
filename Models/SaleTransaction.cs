@@ -7,8 +7,9 @@ namespace BarterPOS.Models
     public enum TransactionStatus
     {
         Completed,
-        Voided,
-        Refunded
+        PartiallyRefunded,
+        Refunded,
+        Voided
     }
 
     public class SaleTransaction
@@ -23,6 +24,7 @@ namespace BarterPOS.Models
         public string PaymentMethod { get; set; } = string.Empty;
         public TransactionStatus Status { get; set; } = TransactionStatus.Completed;
         public List<SaleLineItem> Items { get; set; } = new();
+        public List<SaleLineItem> RefundedItems { get; set; } = new();
         public int TotalItems { get; set; }
         public decimal GrossAmount { get; set; }
         public decimal PercentageDiscount { get; set; }
