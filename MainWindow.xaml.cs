@@ -14,29 +14,6 @@ namespace BarterPOS
         {
             InitializeComponent();
 
-            // #region agent log
-            try
-            {
-                var logLine = System.Text.Json.JsonSerializer.Serialize(new
-                {
-                    sessionId = "15cb7f",
-                    runId = "pre-fix",
-                    hypothesisId = "D",
-                    location = "MainWindow.xaml.cs:ctor",
-                    message = "Session state before SalesViewModel DataContext",
-                    data = new
-                    {
-                        hasCurrentUser = Session.CurrentUser != null,
-                        username = Session.CurrentUser?.Username,
-                        role = Session.CurrentUser?.Role
-                    },
-                    timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
-                }) + Environment.NewLine;
-                System.IO.File.AppendAllText(@"E:\Github Projects\BARTERPLUS-main\debug-15cb7f.log", logLine);
-            }
-            catch { }
-            // #endregion
-
             try
             {
                 DataContext = new SalesViewModel();
@@ -96,12 +73,19 @@ namespace BarterPOS
                 return;
             }
 
-            bool completed = ViewModel.CompleteSale(paymentMethod, out string message);
-            MessageBox.Show(
-                message,
-                completed ? "Receipt" : "Checkout",
-                MessageBoxButton.OK,
-                completed ? MessageBoxImage.Information : MessageBoxImage.Warning);
+            bool completed = ViewModel.CompleteSale(paymentMethod, out string message, out var transaction);
+
+            if (!completed || transaction == null)
+            {
+                MessageBox.Show(message, "Checkout", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var receiptWindow = new ReceiptWindow(transaction)
+            {
+                Owner = this
+            };
+            receiptWindow.ShowDialog();
         }
 
         private void RecordCashMovement(string movementType)

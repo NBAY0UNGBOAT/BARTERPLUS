@@ -223,33 +223,6 @@ namespace BarterPOS.ViewModels
                 RefreshOperationalState();
 
                 InitializeDateTimeTimer();
-
-                // #region agent log
-                try
-                {
-                    var cashierNameProp = typeof(SalesViewModel).GetProperty(nameof(CashierName));
-                    var cashierRoleProp = typeof(SalesViewModel).GetProperty(nameof(CashierRole));
-                    var logLine = System.Text.Json.JsonSerializer.Serialize(new
-                    {
-                        sessionId = "15cb7f",
-                        runId = "pre-fix",
-                        hypothesisId = "A,B",
-                        location = "SalesViewModel.cs:ctor",
-                        message = "Cashier property read-only and values at VM init",
-                        data = new
-                        {
-                            cashierNameCanWrite = cashierNameProp?.CanWrite,
-                            cashierRoleCanWrite = cashierRoleProp?.CanWrite,
-                            cashierName = CashierName,
-                            cashierRole = CashierRole,
-                            hasCurrentUser = Session.CurrentUser != null
-                        },
-                        timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
-                    }) + Environment.NewLine;
-                    System.IO.File.AppendAllText(@"E:\Github Projects\BARTERPLUS-main\debug-15cb7f.log", logLine);
-                }
-                catch { }
-                // #endregion
             }
             catch (Exception ex)
             {
@@ -318,9 +291,10 @@ namespace BarterPOS.ViewModels
             StartNewSale(_currentSale.TransactionId + 1);
         }
 
-        public bool CompleteSale(string paymentMethod, out string message)
+        public bool CompleteSale(string paymentMethod, out string message, out SaleTransaction? transaction)
         {
             message = string.Empty;
+            transaction = null;
 
             if (!_currentSale.Products.Any())
             {
@@ -329,7 +303,7 @@ namespace BarterPOS.ViewModels
             }
 
             decimal amountDue = AmountDue;
-            var transaction = new SaleTransaction
+            var builtTransaction = new SaleTransaction
             {
                 TransactionId = _currentSale.TransactionId,
                 TerminalId = _currentSale.TerminalId,
@@ -355,7 +329,7 @@ namespace BarterPOS.ViewModels
                 ChangeDue = 0m
             };
 
-            SaveSyncResult transactionResult = TransactionRecordStore.Save(transaction);
+            SaveSyncResult transactionResult = TransactionRecordStore.Save(builtTransaction);
             string cashDrawerMessage = string.Empty;
 
             if (paymentMethod.Equals("Cash", StringComparison.OrdinalIgnoreCase) && amountDue > 0m)
@@ -375,7 +349,8 @@ namespace BarterPOS.ViewModels
                 cashDrawerMessage = Environment.NewLine + "Cash Drawer: " + drawerResult.Message;
             }
 
-            message = BuildReceiptSummary(transaction, transactionResult.Message + cashDrawerMessage);
+            transaction = builtTransaction;
+            message = BuildReceiptSummary(builtTransaction, transactionResult.Message + cashDrawerMessage);
             StartNewSale(TransactionRecordStore.GetNextTransactionId());
             RefreshOperationalState();
             return true;

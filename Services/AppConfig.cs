@@ -7,6 +7,8 @@ namespace BarterPOS.Services
     public static class AppConfig
     {
         private const string DefaultDatabaseName = "BARTERPLUS";
+        private const string DefaultStoreName = "BarterPlus Store";
+        private const string DefaultReceiptFooter = "Thank you for shopping with us!";
 
         public static MongoSettings GetMongoSettings()
         {
@@ -24,6 +26,22 @@ namespace BarterPOS.Services
                 DefaultDatabaseName) ?? DefaultDatabaseName;
 
             return new MongoSettings(connectionString, databaseName);
+        }
+
+        public static StoreInfo GetStoreInfo()
+        {
+            var fileSettings = ReadSettingsFile("appsettings.Local.json")
+                ?? ReadSettingsFile("appsettings.json")
+                ?? new AppSettings();
+
+            var store = fileSettings.Store ?? new StoreConfig();
+
+            return new StoreInfo(
+                Name: FirstNotEmpty(store.Name, DefaultStoreName) ?? DefaultStoreName,
+                AddressLine1: store.AddressLine1 ?? string.Empty,
+                AddressLine2: store.AddressLine2 ?? string.Empty,
+                Phone: store.Phone ?? string.Empty,
+                ReceiptFooter: FirstNotEmpty(store.ReceiptFooter, DefaultReceiptFooter) ?? DefaultReceiptFooter);
         }
 
         private static AppSettings? ReadSettingsFile(string fileName)
@@ -81,14 +99,31 @@ namespace BarterPOS.Services
 
     public sealed record MongoSettings(string? ConnectionString, string DatabaseName);
 
+    public sealed record StoreInfo(
+        string Name,
+        string AddressLine1,
+        string AddressLine2,
+        string Phone,
+        string ReceiptFooter);
+
     public sealed class AppSettings
     {
         public MongoConfig? Mongo { get; set; }
+        public StoreConfig? Store { get; set; }
     }
 
     public sealed class MongoConfig
     {
         public string? ConnectionString { get; set; }
         public string? DatabaseName { get; set; }
+    }
+
+    public sealed class StoreConfig
+    {
+        public string? Name { get; set; }
+        public string? AddressLine1 { get; set; }
+        public string? AddressLine2 { get; set; }
+        public string? Phone { get; set; }
+        public string? ReceiptFooter { get; set; }
     }
 }
