@@ -1,0 +1,26 @@
+[
+  {
+    "Id": 100001,
+    "Name": "Maria Santos",
+    "Type": "SENIOR",
+    "Points": 250,
+    "CreditLimit": 0,
+    "IsActive": true
+  },
+  {
+    "Id": 100002,
+    "Name": "Juan Dela Cruz",
+    "Type": "PWD",
+    "Points": 180,
+    "CreditLimit": 0,
+    "IsActive": true
+  },
+  {
+    "Id": 100003,
+    "Name": "Ana Reyes",
+    "Type": "REGULAR",
+    "Points": 95,
+    "CreditLimit": 0,
+    "IsActive": true
+  }
+]

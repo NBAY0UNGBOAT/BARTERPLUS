@@ -79,6 +79,25 @@ namespace BarterPOS.ViewModels
 
         public string CashierRole => Session.CurrentUser?.Role ?? "Cashier";
 
+        public Customer? CurrentCustomer => _currentSale?.Customer;
+
+        public string CustomerDisplayName
+        {
+            get
+            {
+                if (CurrentCustomer == null)
+                {
+                    return "No loyalty customer selected";
+                }
+
+                return $"{CurrentCustomer.Name} · {CurrentCustomer.Type}";
+            }
+        }
+
+        public string CustomerPointsDisplay => CurrentCustomer == null
+            ? string.Empty
+            : $"{CurrentCustomer.Points:N0} loyalty point(s)";
+
         public bool IsPwdDiscount
         {
             get => _isPwdDiscount;
@@ -291,6 +310,29 @@ namespace BarterPOS.ViewModels
             StartNewSale(_currentSale.TransactionId + 1);
         }
 
+        public bool SetCustomer(Customer customer, out string message)
+        {
+            if (!CustomerLoyaltyValidator.ValidateCustomer(customer, out message))
+            {
+                return false;
+            }
+
+            _currentSale.Customer = customer;
+            OnPropertyChanged(nameof(CurrentCustomer));
+            OnPropertyChanged(nameof(CustomerDisplayName));
+            OnPropertyChanged(nameof(CustomerPointsDisplay));
+            message = $"Loyalty customer {customer.Name} has been verified.";
+            return true;
+        }
+
+        public void ClearCustomer()
+        {
+            _currentSale.Customer = null;
+            OnPropertyChanged(nameof(CurrentCustomer));
+            OnPropertyChanged(nameof(CustomerDisplayName));
+            OnPropertyChanged(nameof(CustomerPointsDisplay));
+        }
+
         public bool CompleteSale(string paymentMethod, out string message, out SaleTransaction? transaction)
         {
             message = string.Empty;
@@ -299,6 +341,15 @@ namespace BarterPOS.ViewModels
             if (!_currentSale.Products.Any())
             {
                 message = "Add at least one product before completing the transaction.";
+                return false;
+            }
+
+            if (!CustomerLoyaltyValidator.ValidateDiscountEligibility(
+                    _currentSale.Customer,
+                    IsPwdDiscount,
+                    IsSeniorDiscount,
+                    out message))
+            {
                 return false;
             }
 
@@ -311,6 +362,9 @@ namespace BarterPOS.ViewModels
                 CompletedAt = DateTime.Now,
                 Cashier = CashierName,
                 CashierUsername = Session.CurrentUser?.Username ?? string.Empty,
+                CustomerId = _currentSale.Customer?.Id,
+                CustomerName = _currentSale.Customer?.Name ?? string.Empty,
+                CustomerType = _currentSale.Customer?.Type ?? string.Empty,
                 PaymentMethod = paymentMethod,
                 Items = _currentSale.Products.Select(product => new SaleLineItem
                 {
@@ -432,6 +486,9 @@ namespace BarterPOS.ViewModels
             OnPropertyChanged(nameof(IsPwdDiscount));
             OnPropertyChanged(nameof(IsSeniorDiscount));
             OnPropertyChanged(nameof(DeductionInput));
+            OnPropertyChanged(nameof(CurrentCustomer));
+            OnPropertyChanged(nameof(CustomerDisplayName));
+            OnPropertyChanged(nameof(CustomerPointsDisplay));
             RefreshTotals();
         }
 

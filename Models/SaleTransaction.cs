@@ -21,6 +21,9 @@ namespace BarterPOS.Models
         public DateTime CompletedAt { get; set; } = DateTime.Now;
         public string Cashier { get; set; } = string.Empty;
         public string CashierUsername { get; set; } = string.Empty;
+        public int? CustomerId { get; set; }
+        public string CustomerName { get; set; } = string.Empty;
+        public string CustomerType { get; set; } = string.Empty;
         public string PaymentMethod { get; set; } = string.Empty;
         public TransactionStatus Status { get; set; } = TransactionStatus.Completed;
         public List<SaleLineItem> Items { get; set; } = new();

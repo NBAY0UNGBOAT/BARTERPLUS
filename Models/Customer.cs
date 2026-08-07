@@ -7,5 +7,6 @@ namespace BarterPOS.Models
         public string Type { get; set; } = string.Empty; // SENIOR, PWD, REGULAR
         public decimal Points { get; set; }
         public decimal CreditLimit { get; set; }
+        public bool IsActive { get; set; } = true;
     }
 }

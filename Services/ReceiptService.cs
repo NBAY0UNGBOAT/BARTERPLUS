@@ -39,6 +39,12 @@ namespace BarterPOS.Services
             sb.AppendLine($"Date:       {transaction.CompletedAt:MMM dd, yyyy hh:mm tt}");
             sb.AppendLine($"Terminal:   {transaction.TerminalId}");
             sb.AppendLine($"Cashier:    {transaction.Cashier}");
+            if (!string.IsNullOrWhiteSpace(transaction.CustomerName))
+            {
+                sb.AppendLine($"Customer:   {transaction.CustomerName}");
+                sb.AppendLine($"Member ID:  {transaction.CustomerId}");
+                sb.AppendLine($"Type:       {transaction.CustomerType}");
+            }
 
             AppendDivider(sb);
 

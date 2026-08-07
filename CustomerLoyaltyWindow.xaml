@@ -1,0 +1,68 @@
+<Window x:Class="BarterPOS.CustomerLoyaltyWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Validate Customer Loyalty"
+        Height="370"
+        Width="470"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize">
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="Customer Loyalty Validation"
+                   FontSize="20"
+                   FontWeight="Bold"
+                   Foreground="#1E293B"
+                   Margin="0,0,0,8"/>
+
+        <TextBlock Grid.Row="1"
+                   Text="Enter the loyalty ID to verify an active customer record before applying a customer discount."
+                   TextWrapping="Wrap"
+                   Foreground="#64748B"
+                   Margin="0,0,0,16"/>
+
+        <Grid Grid.Row="2" Margin="0,0,0,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="110"/>
+            </Grid.ColumnDefinitions>
+            <TextBox x:Name="CustomerIdTextBox"
+                     VerticalContentAlignment="Center"
+                     Padding="10,8"
+                     FontSize="14"/>
+            <Button Grid.Column="1"
+                    Content="Validate"
+                    Margin="10,0,0,0"
+                    Click="Validate_Click"/>
+        </Grid>
+
+        <Border x:Name="CustomerDetailsBorder"
+                Grid.Row="3"
+                Visibility="Collapsed"
+                Background="#F8FAFC"
+                BorderBrush="#E2E8F0"
+                BorderThickness="1"
+                CornerRadius="6"
+                Padding="14">
+            <StackPanel>
+                <TextBlock x:Name="CustomerNameText" FontSize="16" FontWeight="SemiBold" Foreground="#1E293B"/>
+                <TextBlock x:Name="CustomerTypeText" Margin="0,6,0,0" Foreground="#475569"/>
+                <TextBlock x:Name="CustomerPointsText" Margin="0,3,0,0" Foreground="#64748B"/>
+            </StackPanel>
+        </Border>
+
+        <StackPanel Grid.Row="4"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Margin="0,18,0,0">
+            <Button Content="Cancel" Width="100" Margin="0,0,10,0" Click="Cancel_Click"/>
+            <Button Content="Use Customer" Width="120" Click="UseCustomer_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

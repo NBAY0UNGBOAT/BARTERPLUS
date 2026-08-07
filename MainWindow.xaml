@@ -236,6 +236,43 @@
 
                 <Border Background="White" CornerRadius="12" Padding="24" Effect="{StaticResource ShadowEffect}" Margin="0,20,0,0">
                     <StackPanel>
+                        <TextBlock Text="CUSTOMER LOYALTY"
+                                   Foreground="{StaticResource TextMutedBrush}"
+                                   FontSize="{StaticResource FontSize.Small}"
+                                   FontWeight="600"
+                                   Margin="0,0,0,8"/>
+                        <TextBlock Text="{Binding CustomerDisplayName, Mode=OneWay}"
+                                   Foreground="{StaticResource TextDarkBrush}"
+                                   FontSize="{StaticResource FontSize.Medium}"
+                                   FontWeight="600"
+                                   TextWrapping="Wrap"/>
+                        <TextBlock Text="{Binding CustomerPointsDisplay, Mode=OneWay}"
+                                   Foreground="{StaticResource TextMutedBrush}"
+                                   FontSize="{StaticResource FontSize.Small}"
+                                   Margin="0,4,0,14"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="110"/>
+                            </Grid.ColumnDefinitions>
+                            <Button Grid.Column="0"
+                                    Content="Validate Customer"
+                                    Background="{StaticResource PrimaryBlueBrush}"
+                                    Style="{StaticResource FunctionButtonStyle}"
+                                    Margin="0,0,6,0"
+                                    Click="AddCustomer_Click"/>
+                            <Button Grid.Column="1"
+                                    Content="Remove"
+                                    Background="{StaticResource AccentOrangeBrush}"
+                                    Style="{StaticResource FunctionButtonStyle}"
+                                    Margin="6,0,0,0"
+                                    Click="ClearCustomer_Click"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <Border Background="White" CornerRadius="12" Padding="24" Effect="{StaticResource ShadowEffect}" Margin="0,20,0,0">
+                    <StackPanel>
                         <TextBlock Text="CASH DRAWER"
                                    Foreground="{StaticResource TextMutedBrush}"
                                    FontSize="{StaticResource FontSize.Small}"

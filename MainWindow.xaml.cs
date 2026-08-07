@@ -59,6 +59,37 @@ namespace BarterPOS
             ViewModel?.ClearSale();
         }
 
+        private void AddCustomer_Click(object sender, RoutedEventArgs e)
+        {
+            if (ViewModel == null)
+            {
+                MessageBox.Show("The sales screen is not ready yet.", "Customer Loyalty", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var window = new CustomerLoyaltyWindow
+            {
+                Owner = this
+            };
+
+            if (window.ShowDialog() != true || window.SelectedCustomer == null)
+            {
+                return;
+            }
+
+            bool assigned = ViewModel.SetCustomer(window.SelectedCustomer, out string message);
+            MessageBox.Show(
+                message,
+                "Customer Loyalty",
+                MessageBoxButton.OK,
+                assigned ? MessageBoxImage.Information : MessageBoxImage.Warning);
+        }
+
+        private void ClearCustomer_Click(object sender, RoutedEventArgs e)
+        {
+            ViewModel?.ClearCustomer();
+        }
+
         private void CashPayment_Click(object sender, RoutedEventArgs e)
         {
             CompleteSale("Cash");

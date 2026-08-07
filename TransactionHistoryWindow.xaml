@@ -27,6 +27,7 @@
                 <DataGridTextColumn Header="Transaction ID" Binding="{Binding TransactionId}"/>
                 <DataGridTextColumn Header="Completed" Binding="{Binding CompletedAt}"/>
                 <DataGridTextColumn Header="Cashier" Binding="{Binding Cashier}"/>
+                <DataGridTextColumn Header="Customer" Binding="{Binding CustomerName}"/>
                 <DataGridTextColumn Header="Payment" Binding="{Binding PaymentMethod}"/>
                 <DataGridTextColumn Header="Total" Binding="{Binding NetAmount}"/>
                 <DataGridTextColumn Header="Status" Binding="{Binding Status}"/>

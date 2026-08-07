@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <None Include="Data\products.seed.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Data\customers.seed.json" CopyToOutputDirectory="PreserveNewest" />
     <None Update="appsettings*.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
