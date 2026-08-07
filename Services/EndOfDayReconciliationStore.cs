@@ -60,6 +60,10 @@ namespace BarterPOS.Services
                 SaveAll(reports);
             }
 
+            AuditTrailStore.RecordReconciliation(
+                report,
+                string.IsNullOrWhiteSpace(report.ReconciledByUsername) ? report.ReconciledBy : report.ReconciledByUsername);
+
             return new SaveSyncResult
             {
                 IsSynced = synced,

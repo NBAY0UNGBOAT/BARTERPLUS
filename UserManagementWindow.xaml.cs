@@ -48,6 +48,16 @@ namespace BarterPOS
             }
         }
 
+        private void AuditTrail_Click(object sender, RoutedEventArgs e)
+        {
+            var window = new AuditTrailWindow
+            {
+                Owner = this
+            };
+
+            window.ShowDialog();
+        }
+
         private void UsersGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             if (UsersGrid.SelectedItem is User user)

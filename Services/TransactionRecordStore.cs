@@ -65,6 +65,10 @@ namespace BarterPOS.Services
                 SaveAll(transactions);
             }
 
+            AuditTrailStore.RecordSale(
+                transaction,
+                string.IsNullOrWhiteSpace(transaction.CashierUsername) ? transaction.Cashier : transaction.CashierUsername);
+
             return new SaveSyncResult
             {
                 IsSynced = synced,
@@ -87,6 +91,28 @@ namespace BarterPOS.Services
                 Upsert(transactions, transaction);
                 SaveAll(transactions);
             }
+
+            string action = transaction.Status switch
+            {
+                TransactionStatus.Voided => "Transaction Voided",
+                TransactionStatus.Refunded => "Transaction Fully Refunded",
+                TransactionStatus.PartiallyRefunded => "Transaction Partially Refunded",
+                _ => "Transaction Updated"
+            };
+
+            string details = transaction.Status switch
+            {
+                TransactionStatus.Voided => $"Voided transaction #{transaction.TransactionId}",
+                TransactionStatus.Refunded => $"Refunded {transaction.RefundedItems.Sum(item => item.Quantity)} item(s) totaling {transaction.RefundedItems.Sum(item => item.Subtotal):C}",
+                TransactionStatus.PartiallyRefunded => $"Refunded {transaction.RefundedItems.Sum(item => item.Quantity)} item(s) totaling {transaction.RefundedItems.Sum(item => item.Subtotal):C}",
+                _ => $"Updated transaction #{transaction.TransactionId}"
+            };
+
+            AuditTrailStore.RecordTransactionUpdate(
+                transaction,
+                action,
+                Session.CurrentUser?.Username ?? transaction.CashierUsername ?? transaction.Cashier,
+                details);
         }
 
         public static SyncResult SyncPending()

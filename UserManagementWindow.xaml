@@ -87,7 +87,10 @@
                         <TextBlock Text="USER ACCOUNTS" FontSize="11" FontWeight="700" Foreground="#64748B"/>
                         <TextBlock Text="Scroll horizontally to view full account details and actions." FontSize="12" Foreground="#64748B" Margin="0,3,0,0"/>
                     </StackPanel>
-                    <Button Grid.Column="1" Content="Create User" Height="38" Padding="16,0" Background="#059669" Foreground="White" BorderThickness="0" FontWeight="600" Cursor="Hand" Click="CreateUser_Click"/>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <Button Content="Audit Trail" Height="38" Padding="16,0" Margin="0,0,10,0" Background="#334155" Foreground="White" BorderThickness="0" FontWeight="600" Cursor="Hand" Click="AuditTrail_Click"/>
+                        <Button Content="Create User" Height="38" Padding="16,0" Background="#059669" Foreground="White" BorderThickness="0" FontWeight="600" Cursor="Hand" Click="CreateUser_Click"/>
+                    </StackPanel>
                 </Grid>
 
                 <DataGrid Grid.Row="1" x:Name="UsersGrid" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeRows="False" IsReadOnly="True" HeadersVisibility="Column" GridLinesVisibility="Horizontal" Background="White" RowHeight="48" MouseDoubleClick="UsersGrid_MouseDoubleClick" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto" EnableColumnVirtualization="False">

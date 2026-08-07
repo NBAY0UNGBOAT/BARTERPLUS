@@ -78,6 +78,10 @@ namespace BarterPOS.Services
                 SaveAll(entries);
             }
 
+            AuditTrailStore.RecordCashDrawer(
+                entry,
+                string.IsNullOrWhiteSpace(entry.CashierUsername) ? entry.Cashier : entry.CashierUsername);
+
             return new SaveSyncResult
             {
                 IsSynced = synced,
