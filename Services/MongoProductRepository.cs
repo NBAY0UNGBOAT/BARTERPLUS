@@ -43,6 +43,30 @@ namespace BarterPOS.Services
             };
         }
 
+        public List<Product> Search(string query)
+        {
+            string term = query.Trim();
+            FilterDefinition<Product> filter = string.IsNullOrWhiteSpace(term)
+                ? FilterDefinition<Product>.Empty
+                : Builders<Product>.Filter.Or(
+                    Builders<Product>.Filter.Regex(p => p.Code, new MongoDB.Bson.BsonRegularExpression(term, "i")),
+                    Builders<Product>.Filter.Regex(p => p.Name, new MongoDB.Bson.BsonRegularExpression(term, "i")));
+
+            return _products.Find(filter)
+                .SortBy(p => p.Name)
+                .Limit(50)
+                .ToList()
+                .Select(product => new Product
+                {
+                    Id = product.Id,
+                    Code = product.Code,
+                    Name = product.Name,
+                    Price = product.Price,
+                    Quantity = 1
+                })
+                .ToList();
+        }
+
         private void EnsureIndexes()
         {
             var barcodeIndex = new CreateIndexModel<Product>(

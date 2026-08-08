@@ -19,6 +19,14 @@ namespace BarterPOS
             if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
             {
                 MessageBox.Show("Please enter both username and password.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                if (string.IsNullOrWhiteSpace(username))
+                {
+                    LoginUsername.Focus();
+                }
+                else
+                {
+                    LoginPassword.Focus();
+                }
                 return;
             }
 

@@ -124,6 +124,22 @@ namespace BarterPOS.Services
             return result;
         }
 
+        public static int ClearPending()
+        {
+            lock (FileLock)
+            {
+                var entries = LoadAll();
+                int removedCount = entries.RemoveAll(e => !e.IsSynced);
+
+                if (removedCount > 0)
+                {
+                    SaveAll(entries);
+                }
+
+                return removedCount;
+            }
+        }
+
         private static bool TrySyncToMongo(CashDrawerEntry entry, out string error)
         {
             error = string.Empty;

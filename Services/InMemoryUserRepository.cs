@@ -17,12 +17,29 @@ namespace BarterPOS.Services
         public User? GetByUsername(string username) =>
             _users.FirstOrDefault(u => u.Username.Equals(username, StringComparison.OrdinalIgnoreCase));
 
+        private User? GetByEmployeeId(string employeeId) =>
+            _users.FirstOrDefault(u => u.EmployeeIdKey == NormalizeEmployeeId(employeeId));
+
         public User? GetById(int id) =>
             _users.FirstOrDefault(u => u.Id == id);
+
+        public string GetNextEmployeeId()
+        {
+            int nextNumber = _users
+                .Select(user => TryParseEmployeeNumber(user.EmployeeID))
+                .DefaultIfEmpty(0)
+                .Max() + 1;
+
+            return FormatEmployeeId(nextNumber);
+        }
 
         public bool Register(User newUser, string plainPassword, out string error)
         {
             error = string.Empty;
+            newUser.Username = newUser.Username.Trim();
+            newUser.EmployeeID = string.IsNullOrWhiteSpace(newUser.EmployeeID)
+                ? GetNextEmployeeId()
+                : newUser.EmployeeID.Trim();
 
             if (GetByUsername(newUser.Username) != null)
             {
@@ -30,8 +47,14 @@ namespace BarterPOS.Services
                 return false;
             }
 
-            newUser.Username = newUser.Username.Trim();
+            if (GetByEmployeeId(newUser.EmployeeID) != null)
+            {
+                error = "That employee ID is already in use.";
+                return false;
+            }
+
             newUser.UsernameKey = newUser.Username.ToLowerInvariant();
+            newUser.EmployeeIdKey = NormalizeEmployeeId(newUser.EmployeeID);
             newUser.Id = _nextUserId++;
             newUser.PasswordHash = PasswordHasher.Hash(plainPassword);
             newUser.IsActive = true;
@@ -142,12 +165,46 @@ namespace BarterPOS.Services
                 return false;
             }
 
-            user.EmployeeID = updatedUser.EmployeeID.Trim();
+            string trimmedEmployeeId = updatedUser.EmployeeID.Trim();
+            var existingEmployeeIdUser = _users.FirstOrDefault(u =>
+                u.Id != updatedUser.Id &&
+                u.EmployeeIdKey == NormalizeEmployeeId(trimmedEmployeeId));
+
+            if (existingEmployeeIdUser != null)
+            {
+                error = "That employee ID is already in use.";
+                return false;
+            }
+
+            user.EmployeeID = trimmedEmployeeId;
+            user.EmployeeIdKey = NormalizeEmployeeId(trimmedEmployeeId);
             user.FullName = updatedUser.FullName.Trim();
             user.Email = updatedUser.Email.Trim();
             user.ContactNumber = updatedUser.ContactNumber.Trim();
             user.LastActivity = "Account Information Updated";
             AddAuditLog(user, "Updated Account Information", performedBy);
+            return true;
+        }
+
+        public bool DeleteUser(int userId, string performedBy, out string error)
+        {
+            error = string.Empty;
+            var user = GetById(userId);
+
+            if (user == null)
+            {
+                error = "User not found.";
+                return false;
+            }
+
+            if (user.Role == "Admin" && _users.Count(u => u.Role == "Admin") <= 1)
+            {
+                error = "You cannot delete the last admin account.";
+                return false;
+            }
+
+            AddAuditLog(user, "Deleted Account", performedBy);
+            _users.Remove(user);
             return true;
         }
 
@@ -171,5 +228,25 @@ namespace BarterPOS.Services
                 Timestamp = DateTime.Now
             });
         }
+
+        private static string NormalizeEmployeeId(string employeeId) =>
+            employeeId.Trim().ToUpperInvariant();
+
+        private static int TryParseEmployeeNumber(string employeeId)
+        {
+            string normalized = NormalizeEmployeeId(employeeId);
+
+            if (!normalized.StartsWith("EMP-"))
+            {
+                return 0;
+            }
+
+            return int.TryParse(normalized.Substring(4), out int number)
+                ? number
+                : 0;
+        }
+
+        private static string FormatEmployeeId(int number) =>
+            $"EMP-{number:D4}";
     }
 }

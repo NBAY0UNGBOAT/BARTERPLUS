@@ -12,8 +12,9 @@ namespace BarterPOS.Models
         public string ContactNumber { get; set; } = string.Empty;
         public string Username { get; set; } = string.Empty;
         public string UsernameKey { get; set; } = string.Empty;
+        public string EmployeeIdKey { get; set; } = string.Empty;
         public string PasswordHash { get; set; } = string.Empty;
-        public string Role { get; set; } = string.Empty; // Admin, Manager, Employee, Cashier
+        public string Role { get; set; } = string.Empty; // Admin, Employee
 
         public bool IsActive { get; set; } = true;
 

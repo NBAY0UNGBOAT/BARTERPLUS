@@ -16,7 +16,6 @@
 
         <StackPanel Grid.Row="0" Margin="0,0,0,18">
             <TextBlock Text="Create User" FontSize="26" FontWeight="700" Foreground="#1E40AF"/>
-            <TextBlock Text="Add a staff account and assign its starting permission." FontSize="12" Foreground="#64748B" Margin="0,4,0,0"/>
         </StackPanel>
 
         <Border Grid.Row="1" Background="White" CornerRadius="8" Padding="18">
@@ -34,37 +33,35 @@
 
                 <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,10,12">
                     <TextBlock Text="Employee ID" FontWeight="600" Foreground="#334155"/>
-                    <TextBox x:Name="EmployeeIdText" Padding="10,8"/>
+                    <TextBox x:Name="EmployeeIdText" Padding="10,8" MaxLength="20" IsReadOnly="True" Background="#F1F5F9"/>
                 </StackPanel>
                 <StackPanel Grid.Row="0" Grid.Column="1" Margin="10,0,0,12">
                     <TextBlock Text="Employee Name" FontWeight="600" Foreground="#334155"/>
-                    <TextBox x:Name="FullNameText" Padding="10,8"/>
+                    <TextBox x:Name="FullNameText" Padding="10,8" MaxLength="80"/>
                 </StackPanel>
 
                 <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,10,12">
                     <TextBlock Text="Email" FontWeight="600" Foreground="#334155"/>
-                    <TextBox x:Name="EmailText" Padding="10,8"/>
+                    <TextBox x:Name="EmailText" Padding="10,8" MaxLength="120"/>
                 </StackPanel>
                 <StackPanel Grid.Row="1" Grid.Column="1" Margin="10,0,0,12">
                     <TextBlock Text="Contact Number" FontWeight="600" Foreground="#334155"/>
-                    <TextBox x:Name="ContactNumberText" Padding="10,8"/>
+                    <TextBox x:Name="ContactNumberText" Padding="10,8" MaxLength="20"/>
                 </StackPanel>
 
                 <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,10,12">
                     <TextBlock Text="Username" FontWeight="600" Foreground="#334155"/>
-                    <TextBox x:Name="UsernameText" Padding="10,8"/>
+                    <TextBox x:Name="UsernameText" Padding="10,8" MaxLength="30"/>
                 </StackPanel>
                 <StackPanel Grid.Row="2" Grid.Column="1" Margin="10,0,0,12">
                     <TextBlock Text="Temporary Password" FontWeight="600" Foreground="#334155"/>
-                    <PasswordBox x:Name="PasswordText" Padding="10,8"/>
+                    <PasswordBox x:Name="PasswordText" Padding="10,8" MaxLength="64"/>
                 </StackPanel>
 
                 <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2">
                     <TextBlock Text="Permission" FontWeight="600" Foreground="#334155"/>
-                    <ComboBox x:Name="RoleComboBox" Padding="10,8" SelectedIndex="2">
+                    <ComboBox x:Name="RoleComboBox" Padding="10,8" SelectedIndex="1">
                         <ComboBoxItem Content="Admin"/>
-                        <ComboBoxItem Content="Manager"/>
-                        <ComboBoxItem Content="Cashier"/>
                         <ComboBoxItem Content="Employee"/>
                     </ComboBox>
                 </StackPanel>
@@ -73,13 +70,11 @@
 
         <Grid Grid.Row="2" Margin="0,18,0,0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <TextBlock Text="The account is active immediately after creation." FontSize="12" Foreground="#64748B" VerticalAlignment="Center"/>
-            <Button Grid.Column="1" Content="Cancel" Width="100" Height="38" Margin="0,0,10,0" Background="#E2E8F0" Foreground="#1E293B" BorderThickness="0" FontWeight="600" Cursor="Hand" Click="Cancel_Click"/>
-            <Button Grid.Column="2" Content="Create User" Width="120" Height="38" Background="#059669" Foreground="White" BorderThickness="0" FontWeight="600" Cursor="Hand" Click="Create_Click"/>
+            <Button Grid.Column="0" Content="Cancel" Width="100" Height="38" Margin="0,0,10,0" Background="#E2E8F0" Foreground="#1E293B" BorderThickness="0" FontWeight="600" Cursor="Hand" Click="Cancel_Click"/>
+            <Button Grid.Column="1" Content="Create User" Width="120" Height="38" Background="#059669" Foreground="White" BorderThickness="0" FontWeight="600" Cursor="Hand" Click="Create_Click"/>
         </Grid>
     </Grid>
 </Window>

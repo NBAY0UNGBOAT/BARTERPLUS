@@ -32,6 +32,8 @@ namespace BarterPOS.Models
         public decimal GrossAmount { get; set; }
         public decimal PercentageDiscount { get; set; }
         public decimal ManualDeduction { get; set; }
+        public decimal LoyaltyCreditRedeemed { get; set; }
+        public decimal LoyaltyPointsEarned { get; set; }
         public decimal NetAmount { get; set; }
         public decimal AmountPaid { get; set; }
         public decimal ChangeDue { get; set; }

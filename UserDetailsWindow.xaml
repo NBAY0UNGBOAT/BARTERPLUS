@@ -17,7 +17,6 @@
 
             <StackPanel Grid.Row="0" Margin="0,0,0,18">
                 <TextBlock x:Name="TitleText" Text="User Details" FontSize="26" FontWeight="700" Foreground="#1E40AF"/>
-                <TextBlock Text="Account information, permission management, activity, and performance" FontSize="12" Foreground="#64748B"/>
             </StackPanel>
 
             <Border Grid.Row="1" Background="White" CornerRadius="8" Padding="18" Margin="0,0,0,16">
@@ -42,16 +41,16 @@
                     </StackPanel>
                     <StackPanel Grid.Row="1" Grid.Column="1" Margin="12,0,0,12">
                         <TextBlock Text="Employee Name" FontWeight="600" Foreground="#334155"/>
-                        <TextBox x:Name="EmployeeNameText" Padding="10,8"/>
+                        <TextBox x:Name="EmployeeNameText" Padding="10,8" MaxLength="80"/>
                     </StackPanel>
 
                     <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,12,12">
                         <TextBlock Text="Email" FontWeight="600" Foreground="#334155"/>
-                        <TextBox x:Name="EmailText" Padding="10,8"/>
+                        <TextBox x:Name="EmailText" Padding="10,8" MaxLength="120"/>
                     </StackPanel>
                     <StackPanel Grid.Row="2" Grid.Column="1" Margin="12,0,0,12">
                         <TextBlock Text="Contact Number" FontWeight="600" Foreground="#334155"/>
-                        <TextBox x:Name="ContactNumberText" Padding="10,8"/>
+                        <TextBox x:Name="ContactNumberText" Padding="10,8" MaxLength="20"/>
                     </StackPanel>
 
                     <StackPanel Grid.Row="3" Grid.Column="0" Margin="0,0,12,12">
@@ -83,8 +82,6 @@
                         <TextBlock Text="Current Role" FontWeight="600" Foreground="#334155"/>
                         <ComboBox x:Name="RoleComboBox" Padding="10,8" Margin="0,0,0,12">
                             <ComboBoxItem Content="Admin"/>
-                            <ComboBoxItem Content="Manager"/>
-                            <ComboBoxItem Content="Cashier"/>
                             <ComboBoxItem Content="Employee"/>
                         </ComboBox>
                         <Button Content="Change Role" Height="38" Background="#059669" Foreground="White" BorderThickness="0" FontWeight="600" Margin="0,0,0,10" Click="ChangeRole_Click"/>
@@ -96,8 +93,9 @@
                     <StackPanel>
                         <TextBlock Text="RESET PASSWORD" FontSize="11" FontWeight="700" Foreground="#64748B" Margin="0,0,0,12"/>
                         <TextBlock Text="New Password" FontWeight="600" Foreground="#334155"/>
-                        <PasswordBox x:Name="NewPasswordBox" Padding="10,8" Margin="0,0,0,12"/>
+                        <PasswordBox x:Name="NewPasswordBox" Padding="10,8" Margin="0,0,0,12" MaxLength="64"/>
                         <Button Content="Reset Password" Height="38" Background="#334155" Foreground="White" BorderThickness="0" FontWeight="600" Click="ResetPassword_Click"/>
+                        <Button x:Name="DeleteAccountButton" Content="Delete Account" Height="38" Margin="0,10,0,0" Background="#B91C1C" Foreground="White" BorderThickness="0" FontWeight="600" Click="DeleteAccount_Click"/>
                     </StackPanel>
                 </Border>
             </Grid>
@@ -122,15 +120,13 @@
 
                 <Border Grid.Column="1" Background="White" CornerRadius="8" Padding="18" Margin="8,0,0,0">
                     <StackPanel>
-                        <TextBlock Text="PERFORMANCE SUMMARY" FontSize="11" FontWeight="700" Foreground="#64748B" Margin="0,0,0,12"/>
-                        <TextBlock Text="Total Sales Today" Foreground="#64748B"/>
-                        <TextBlock Text="PHP 0" FontSize="20" FontWeight="700" Foreground="#1E293B" Margin="0,0,0,10"/>
-                        <TextBlock Text="Total Sales This Month" Foreground="#64748B"/>
-                        <TextBlock Text="PHP 82,450" FontSize="20" FontWeight="700" Foreground="#1E293B" Margin="0,0,0,10"/>
-                        <TextBlock Text="Number of Transactions" Foreground="#64748B"/>
-                        <TextBlock Text="154" FontSize="20" FontWeight="700" Foreground="#1E293B" Margin="0,0,0,10"/>
-                        <TextBlock Text="Average Transaction Value" Foreground="#64748B"/>
-                        <TextBlock Text="PHP 535" FontSize="20" FontWeight="700" Foreground="#1E293B"/>
+                        <TextBlock Text="ACCOUNT STATUS" FontSize="11" FontWeight="700" Foreground="#64748B" Margin="0,0,0,12"/>
+                        <TextBlock Text="Current Role" Foreground="#64748B"/>
+                        <TextBlock Text="{Binding ElementName=RoleComboBox, Path=Text}" FontSize="20" FontWeight="700" Foreground="#1E293B" Margin="0,0,0,10"/>
+                        <TextBlock Text="Current Status" Foreground="#64748B"/>
+                        <TextBlock Text="{Binding ElementName=StatusText, Path=Text}" FontSize="20" FontWeight="700" Foreground="#1E293B" Margin="0,0,0,10"/>
+                        <TextBlock Text="Last Login" Foreground="#64748B"/>
+                        <TextBlock Text="{Binding ElementName=LastLoginText, Path=Text}" FontSize="16" FontWeight="600" Foreground="#1E293B"/>
                     </StackPanel>
                 </Border>
             </Grid>

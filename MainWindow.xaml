@@ -80,6 +80,7 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0" Orientation="Vertical">
@@ -126,6 +127,28 @@
                 </Button>
 
                 <Button Grid.Column="4"
+                        x:Name="ClearPendingButton"
+                        Content="Clear Pending"
+                        FontSize="{StaticResource FontSize.Normal}"
+                        FontWeight="600"
+                        Foreground="White"
+                        Background="#B91C1C"
+                        Padding="12,6"
+                        BorderThickness="0"
+                        Cursor="Hand"
+                        Margin="0,0,12,0"
+                        Visibility="Collapsed"
+                        Click="ClearPendingOffline_Click">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+
+                <Button Grid.Column="5"
                         x:Name="ManageUsersButton"
                         Content="Manage Users"
                         FontSize="{StaticResource FontSize.Normal}"
@@ -147,7 +170,7 @@
                     </Button.Template>
                 </Button>
 
-                <Button Grid.Column="5"
+                <Button Grid.Column="6"
                         Content="Logout"
                         FontSize="{StaticResource FontSize.Normal}"
                         FontWeight="600"
@@ -251,17 +274,30 @@
                                    FontSize="{StaticResource FontSize.Small}"
                                    Margin="0,4,0,14"/>
                         <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <Button Grid.Column="0"
+                            <Button Grid.Row="0"
+                                    Grid.ColumnSpan="2"
                                     Content="Validate Customer"
                                     Background="{StaticResource PrimaryBlueBrush}"
                                     Style="{StaticResource FunctionButtonStyle}"
-                                    Margin="0,0,6,0"
+                                    Margin="0,0,0,10"
                                     Click="AddCustomer_Click"/>
-                            <Button Grid.Column="1"
+                            <Button Grid.Row="1"
+                                    Grid.Column="0"
+                                    Content="Create Card"
+                                    Background="{StaticResource AccentGreenBrush}"
+                                    Style="{StaticResource FunctionButtonStyle}"
+                                    Margin="0,0,6,0"
+                                    Click="CreateLoyaltyCard_Click"/>
+                            <Button Grid.Row="1"
+                                    Grid.Column="1"
                                     Content="Remove"
                                     Background="{StaticResource AccentOrangeBrush}"
                                     Style="{StaticResource FunctionButtonStyle}"
@@ -325,6 +361,7 @@
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="SCAN" FontSize="26" VerticalAlignment="Center" Margin="0,0,12,0"/>
                         <TextBox Grid.Column="1"
+                                 x:Name="ScanTextBox"
                                  FontSize="{StaticResource FontSize.Large}"
                                  Padding="12"
                                  Background="Transparent"
@@ -336,6 +373,8 @@
 
                 <Border Background="White" CornerRadius="12" Effect="{StaticResource ShadowEffect}" Padding="0">
                     <DataGrid ItemsSource="{Binding LineItems}"
+                              SelectedItem="{Binding SelectedLineItem, Mode=TwoWay}"
+                              x:Name="LineItemsGrid"
                               AutoGenerateColumns="False"
                               CanUserAddRows="False"
                               CanUserDeleteRows="False"
@@ -359,14 +398,14 @@
 
         <Border Grid.Row="2" Background="#1A1A2E" Padding="8">
             <UniformGrid Columns="8" Margin="8">
-                <Button Background="{StaticResource PrimaryBlueBrush}" Style="{StaticResource FunctionButtonStyle}" Margin="3">
+                <Button Background="{StaticResource PrimaryBlueBrush}" Style="{StaticResource FunctionButtonStyle}" Margin="3" Click="ItemSearch_Click">
                     <StackPanel Orientation="Vertical">
                         <TextBlock Text="F1" FontSize="11" Foreground="White" TextAlignment="Center" Margin="0,0,0,3" FontWeight="700"/>
                         <TextBlock Text="Item Search" FontSize="10" Foreground="White" TextAlignment="Center"/>
                     </StackPanel>
                 </Button>
 
-                <Button Background="{StaticResource PrimaryBlueBrush}" Style="{StaticResource FunctionButtonStyle}" Margin="3">
+                <Button Background="{StaticResource PrimaryBlueBrush}" Style="{StaticResource FunctionButtonStyle}" Margin="3" Click="VoidLine_Click">
                     <StackPanel Orientation="Vertical">
                         <TextBlock Text="F2" FontSize="11" Foreground="White" TextAlignment="Center" Margin="0,0,0,3" FontWeight="700"/>
                         <TextBlock Text="Void Line" FontSize="10" Foreground="White" TextAlignment="Center"/>

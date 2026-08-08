@@ -34,6 +34,29 @@ namespace BarterPOS.Services
             };
         }
 
+        public List<Product> Search(string query)
+        {
+            string term = query.Trim();
+
+            IEnumerable<Product> matches = string.IsNullOrWhiteSpace(term)
+                ? _products
+                : _products.Where(p =>
+                    p.Code.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                    p.Name.Contains(term, StringComparison.OrdinalIgnoreCase));
+
+            return matches
+                .OrderBy(p => p.Name)
+                .Select(match => new Product
+                {
+                    Id = match.Id,
+                    Code = match.Code,
+                    Name = match.Name,
+                    Price = match.Price,
+                    Quantity = 1
+                })
+                .ToList();
+        }
+
         private static List<Product> LoadSeedProducts()
         {
             try

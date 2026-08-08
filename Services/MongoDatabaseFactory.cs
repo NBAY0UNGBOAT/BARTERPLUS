@@ -42,6 +42,14 @@ namespace BarterPOS.Services
             }
         }
 
+        public static void ResetSyncCooldown()
+        {
+            lock (SyncStateLock)
+            {
+                _syncSuspendedUntil = null;
+            }
+        }
+
         public static bool TryCreateDatabase(out IMongoDatabase? database, out string error)
         {
             database = null;

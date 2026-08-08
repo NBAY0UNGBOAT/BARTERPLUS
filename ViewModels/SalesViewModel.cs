@@ -13,6 +13,7 @@ namespace BarterPOS.ViewModels
     public class SalesViewModel : INotifyPropertyChanged
     {
         private const decimal SeniorPwdDiscountRate = 0.20m;
+        private const decimal LoyaltyEarnRate = 0.001m;
 
         private Sale _currentSale = null!;
         private string _barcodeInput = string.Empty;
@@ -24,6 +25,7 @@ namespace BarterPOS.ViewModels
         private decimal _cashDrawerBalance;
         private bool _isPwdDiscount;
         private bool _isSeniorDiscount;
+        private Product? _selectedLineItem;
         private DispatcherTimer? _dateTimeTimer;
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -75,9 +77,12 @@ namespace BarterPOS.ViewModels
         public string CashierName =>
             Session.CurrentUser?.FullName is { Length: > 0 } fullName
                 ? fullName
-                : Session.CurrentUser?.Username ?? "Cashier";
+                : Session.CurrentUser?.Username ?? "Employee";
 
-        public string CashierRole => Session.CurrentUser?.Role ?? "Cashier";
+        public string CashierRole =>
+            Session.CurrentUser?.Role == "Cashier"
+                ? "Employee"
+                : Session.CurrentUser?.Role ?? "Employee";
 
         public Customer? CurrentCustomer => _currentSale?.Customer;
 
@@ -87,7 +92,7 @@ namespace BarterPOS.ViewModels
             {
                 if (CurrentCustomer == null)
                 {
-                    return "No loyalty customer selected";
+                    return "No customer selected";
                 }
 
                 return $"{CurrentCustomer.Name} · {CurrentCustomer.Type}";
@@ -96,7 +101,7 @@ namespace BarterPOS.ViewModels
 
         public string CustomerPointsDisplay => CurrentCustomer == null
             ? string.Empty
-            : $"{CurrentCustomer.Points:N0} loyalty point(s)";
+            : $"{CurrentCustomer.Points:N2} pts | {CurrentCustomer.CreditLimit:C} credit";
 
         public bool IsPwdDiscount
         {
@@ -181,6 +186,19 @@ namespace BarterPOS.ViewModels
         public decimal AmountDue => Math.Max(0m, TotalAmount - PercentageDiscount - ManualDeduction);
 
         public ObservableCollection<Product> LineItems => _currentSale.Products;
+
+        public Product? SelectedLineItem
+        {
+            get => _selectedLineItem;
+            set
+            {
+                if (_selectedLineItem != value)
+                {
+                    _selectedLineItem = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
 
         public string SyncStatusText
         {
@@ -302,7 +320,24 @@ namespace BarterPOS.ViewModels
         public void RemoveProduct(Product product)
         {
             _currentSale.Products.Remove(product);
+            if (SelectedLineItem == product)
+            {
+                SelectedLineItem = null;
+            }
             RefreshTotals();
+        }
+
+        public bool RemoveSelectedLineItem(out string message)
+        {
+            if (SelectedLineItem == null)
+            {
+                message = "Select a line item to void.";
+                return false;
+            }
+
+            RemoveProduct(SelectedLineItem);
+            message = "Selected line item removed.";
+            return true;
         }
 
         public void ClearSale()
@@ -354,6 +389,24 @@ namespace BarterPOS.ViewModels
             }
 
             decimal amountDue = AmountDue;
+            decimal loyaltyCreditRedeemed = CurrentCustomer == null
+                ? 0m
+                : Math.Min(ManualDeduction, Math.Max(0m, CurrentCustomer.CreditLimit));
+            decimal loyaltyPointsEarned = CurrentCustomer == null
+                ? 0m
+                : Math.Round(amountDue * LoyaltyEarnRate, 2, MidpointRounding.AwayFromZero);
+            var transactionItems = _currentSale.Products
+                .GroupBy(product => new { product.Code, product.Name, product.Price })
+                .Select(group => new SaleLineItem
+                {
+                    Code = group.Key.Code,
+                    Name = group.Key.Name,
+                    UnitPrice = group.Key.Price,
+                    Quantity = group.Sum(product => product.Quantity),
+                    Subtotal = group.Sum(product => product.Subtotal)
+                })
+                .ToList();
+
             var builtTransaction = new SaleTransaction
             {
                 TransactionId = _currentSale.TransactionId,
@@ -366,18 +419,13 @@ namespace BarterPOS.ViewModels
                 CustomerName = _currentSale.Customer?.Name ?? string.Empty,
                 CustomerType = _currentSale.Customer?.Type ?? string.Empty,
                 PaymentMethod = paymentMethod,
-                Items = _currentSale.Products.Select(product => new SaleLineItem
-                {
-                    Code = product.Code,
-                    Name = product.Name,
-                    UnitPrice = product.Price,
-                    Quantity = product.Quantity,
-                    Subtotal = product.Subtotal
-                }).ToList(),
+                Items = transactionItems,
                 TotalItems = TotalItems,
                 GrossAmount = TotalAmount,
                 PercentageDiscount = PercentageDiscount,
                 ManualDeduction = ManualDeduction,
+                LoyaltyCreditRedeemed = loyaltyCreditRedeemed,
+                LoyaltyPointsEarned = loyaltyPointsEarned,
                 NetAmount = amountDue,
                 AmountPaid = amountDue,
                 ChangeDue = 0m
@@ -385,6 +433,32 @@ namespace BarterPOS.ViewModels
 
             SaveSyncResult transactionResult = TransactionRecordStore.Save(builtTransaction);
             string cashDrawerMessage = string.Empty;
+            string loyaltyMessage = string.Empty;
+
+            if (_currentSale.Customer != null)
+            {
+                Customer updatedCustomer = InMemoryCustomerRepository.Copy(_currentSale.Customer);
+                updatedCustomer.Points = Math.Max(0m, updatedCustomer.Points + loyaltyPointsEarned);
+                updatedCustomer.CreditLimit = Math.Max(0m, updatedCustomer.CreditLimit - loyaltyCreditRedeemed + loyaltyPointsEarned);
+
+                if (CustomerStore.Repository.Update(updatedCustomer, out string customerUpdateError))
+                {
+                    _currentSale.Customer = updatedCustomer;
+                    OnPropertyChanged(nameof(CurrentCustomer));
+                    OnPropertyChanged(nameof(CustomerDisplayName));
+                    OnPropertyChanged(nameof(CustomerPointsDisplay));
+
+                    if (loyaltyCreditRedeemed > 0m || loyaltyPointsEarned > 0m)
+                    {
+                        loyaltyMessage = Environment.NewLine
+                            + $"Loyalty: used {loyaltyCreditRedeemed:C} credit, earned {loyaltyPointsEarned:N2} point(s).";
+                    }
+                }
+                else if (!string.IsNullOrWhiteSpace(customerUpdateError))
+                {
+                    loyaltyMessage = Environment.NewLine + $"Loyalty: {customerUpdateError}";
+                }
+            }
 
             if (paymentMethod.Equals("Cash", StringComparison.OrdinalIgnoreCase) && amountDue > 0m)
             {
@@ -404,7 +478,7 @@ namespace BarterPOS.ViewModels
             }
 
             transaction = builtTransaction;
-            message = BuildReceiptSummary(builtTransaction, transactionResult.Message + cashDrawerMessage);
+            message = BuildReceiptSummary(builtTransaction, transactionResult.Message + cashDrawerMessage + loyaltyMessage);
             StartNewSale(TransactionRecordStore.GetNextTransactionId());
             RefreshOperationalState();
             return true;
@@ -438,6 +512,8 @@ namespace BarterPOS.ViewModels
 
         public string SyncOfflineData()
         {
+            MongoDatabaseFactory.ResetSyncCooldown();
+
             SyncResult transactionResult = TransactionRecordStore.SyncPending();
             SyncResult drawerResult = CashDrawerStore.SyncPending();
 
@@ -452,15 +528,31 @@ namespace BarterPOS.ViewModels
 
             if (totalPending == 0)
             {
-                return "No offline transactions or cash drawer entries are waiting to sync.";
+                return "No pending records.";
             }
 
             if (totalFailed > 0)
             {
-                return $"Synced {totalSynced} record(s). {totalFailed} record(s) are still pending. {lastError}";
+                return $"Synced {totalSynced} record(s). {totalFailed} record(s) are still pending. Remote sync will be done after closing hours.";
             }
 
-            return $"Synced {totalSynced} offline record(s) successfully.";
+            return $"Synced {totalSynced} record(s).";
+        }
+
+        public string ClearPendingOfflineData()
+        {
+            int removedTransactions = TransactionRecordStore.ClearPending();
+            int removedDrawerEntries = CashDrawerStore.ClearPending();
+            int totalRemoved = removedTransactions + removedDrawerEntries;
+
+            RefreshOperationalState();
+
+            if (totalRemoved == 0)
+            {
+                return "No pending records found.";
+            }
+
+            return $"Cleared {totalRemoved} pending record(s).";
         }
 
         private Sale CreateSale(int transactionId)
@@ -481,11 +573,13 @@ namespace BarterPOS.ViewModels
             _isPwdDiscount = false;
             _isSeniorDiscount = false;
             _deductionInput = string.Empty;
+            _selectedLineItem = null;
 
             OnPropertyChanged(nameof(CurrentSale));
             OnPropertyChanged(nameof(IsPwdDiscount));
             OnPropertyChanged(nameof(IsSeniorDiscount));
             OnPropertyChanged(nameof(DeductionInput));
+            OnPropertyChanged(nameof(SelectedLineItem));
             OnPropertyChanged(nameof(CurrentCustomer));
             OnPropertyChanged(nameof(CustomerDisplayName));
             OnPropertyChanged(nameof(CustomerPointsDisplay));
@@ -500,9 +594,9 @@ namespace BarterPOS.ViewModels
             PendingSyncCount = pendingTransactions + pendingDrawerEntries;
             SyncStatusText = MongoDatabaseFactory.IsConfigured
                 ? PendingSyncCount == 0
-                    ? "Online sync ready"
-                    : $"{PendingSyncCount} offline record(s) pending"
-                : $"{PendingSyncCount} local record(s) pending - MongoDB not configured";
+                    ? "Ready"
+                    : $"{PendingSyncCount} record(s) pending"
+                : $"{PendingSyncCount} record(s) pending";
             CashDrawerBalance = CashDrawerStore.GetCurrentBalance();
             CashDrawerLastActivity = CashDrawerStore.GetLastActivityText();
         }
@@ -514,6 +608,8 @@ namespace BarterPOS.ViewModels
                 + $"Items: {transaction.TotalItems}" + Environment.NewLine
                 + $"Subtotal: {transaction.GrossAmount:C}" + Environment.NewLine
                 + $"Discounts: {(transaction.PercentageDiscount + transaction.ManualDeduction):C}" + Environment.NewLine
+                + (transaction.LoyaltyCreditRedeemed > 0m ? $"Loyalty Credit Used: {transaction.LoyaltyCreditRedeemed:C}" + Environment.NewLine : string.Empty)
+                + (transaction.LoyaltyPointsEarned > 0m ? $"Loyalty Earned: {transaction.LoyaltyPointsEarned:N2}" + Environment.NewLine : string.Empty)
                 + $"Total Paid: {transaction.NetAmount:C}" + Environment.NewLine
                 + Environment.NewLine
                 + syncMessage;

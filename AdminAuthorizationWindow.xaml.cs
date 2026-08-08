@@ -18,6 +18,26 @@ namespace BarterPOS
             string username = UsernameTextBox.Text.Trim();
             string password = PasswordBox.Password;
 
+            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+            {
+                MessageBox.Show(
+                    "Please enter both username and password.",
+                    "Validation Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+
+                if (string.IsNullOrWhiteSpace(username))
+                {
+                    UsernameTextBox.Focus();
+                }
+                else
+                {
+                    PasswordBox.Focus();
+                }
+
+                return;
+            }
+
             bool success = UserStore.Repository.ValidateCredentials(
                 username,
                 password,

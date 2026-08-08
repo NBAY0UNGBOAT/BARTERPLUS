@@ -10,6 +10,7 @@ namespace BarterPOS
         public CreateUserWindow()
         {
             InitializeComponent();
+            EmployeeIdText.Text = UserStore.Repository.GetNextEmployeeId();
         }
 
         private void Create_Click(object sender, RoutedEventArgs e)
@@ -20,13 +21,45 @@ namespace BarterPOS
                 return;
             }
 
+            string employeeId = EmployeeIdText.Text.Trim();
+            string fullName = FullNameText.Text.Trim();
+            string email = EmailText.Text.Trim();
+            string contactNumber = ContactNumberText.Text.Trim();
             string username = UsernameText.Text.Trim();
             string password = PasswordText.Password;
             string role = selectedRole.Content.ToString() ?? "Employee";
 
-            if (string.IsNullOrWhiteSpace(username))
+            if (!InputValidator.IsValidEmployeeId(employeeId))
             {
-                MessageBox.Show("Please enter a username.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Enter a valid employee ID using 3-20 letters, numbers, dashes, or underscores.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                EmployeeIdText.Focus();
+                return;
+            }
+
+            if (!InputValidator.IsValidPersonName(fullName))
+            {
+                MessageBox.Show("Please enter the employee name using at least 2 characters.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                FullNameText.Focus();
+                return;
+            }
+
+            if (!InputValidator.IsValidEmail(email))
+            {
+                MessageBox.Show("Please enter a valid email address or leave it blank.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                EmailText.Focus();
+                return;
+            }
+
+            if (!InputValidator.IsValidContactNumber(contactNumber))
+            {
+                MessageBox.Show("Please enter a valid contact number or leave it blank.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                ContactNumberText.Focus();
+                return;
+            }
+
+            if (!InputValidator.IsValidUsername(username))
+            {
+                MessageBox.Show("Enter a valid username using 3-30 letters, numbers, dots, dashes, or underscores.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                 UsernameText.Focus();
                 return;
             }
@@ -40,10 +73,10 @@ namespace BarterPOS
 
             var newUser = new User
             {
-                EmployeeID = EmployeeIdText.Text.Trim(),
-                FullName = FullNameText.Text.Trim(),
-                Email = EmailText.Text.Trim(),
-                ContactNumber = ContactNumberText.Text.Trim(),
+                EmployeeID = employeeId,
+                FullName = fullName,
+                Email = email,
+                ContactNumber = contactNumber,
                 Username = username,
                 Role = role,
                 LastActivity = $"Account Created by {Session.CurrentUser?.Username ?? "Admin"}"

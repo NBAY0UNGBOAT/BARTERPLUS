@@ -59,6 +59,26 @@ namespace BarterPOS
             DialogResult = true;
         }
 
+        private void CreateCustomer_Click(object sender, RoutedEventArgs e)
+        {
+            var window = new CreateLoyaltyCustomerWindow
+            {
+                Owner = this
+            };
+
+            if (window.ShowDialog() != true || window.CreatedCustomer == null)
+            {
+                return;
+            }
+
+            SelectedCustomer = window.CreatedCustomer;
+            CustomerIdTextBox.Text = SelectedCustomer.Id.ToString(CultureInfo.InvariantCulture);
+            CustomerNameText.Text = SelectedCustomer.Name;
+            CustomerTypeText.Text = $"Customer type: {SelectedCustomer.Type.Trim().ToUpperInvariant()}";
+            CustomerPointsText.Text = $"Available loyalty points: {SelectedCustomer.Points:N0}";
+            CustomerDetailsBorder.Visibility = Visibility.Visible;
+        }
+
         private void Cancel_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = false;

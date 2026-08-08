@@ -54,19 +54,6 @@ namespace BarterPOS.Services
                 return true;
             }
 
-            if (!ValidateCustomer(customer, out message))
-            {
-                message = "Validate an active loyalty customer before applying a PWD or Senior discount.";
-                return false;
-            }
-
-            string requiredType = isPwdDiscount ? "PWD" : "SENIOR";
-            if (!NormalizeType(customer!.Type).Equals(requiredType, StringComparison.Ordinal))
-            {
-                message = $"The selected customer is registered as {NormalizeType(customer.Type)}, so the {requiredType} discount cannot be applied.";
-                return false;
-            }
-
             message = string.Empty;
             return true;
         }

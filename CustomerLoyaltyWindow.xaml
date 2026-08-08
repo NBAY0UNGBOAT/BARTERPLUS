@@ -31,6 +31,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="110"/>
+                <ColumnDefinition Width="110"/>
             </Grid.ColumnDefinitions>
             <TextBox x:Name="CustomerIdTextBox"
                      VerticalContentAlignment="Center"
@@ -40,6 +41,10 @@
                     Content="Validate"
                     Margin="10,0,0,0"
                     Click="Validate_Click"/>
+            <Button Grid.Column="2"
+                    Content="Create Card"
+                    Margin="10,0,0,0"
+                    Click="CreateCustomer_Click"/>
         </Grid>
 
         <Border x:Name="CustomerDetailsBorder"

@@ -118,14 +118,13 @@
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
-                    <DataGridTemplateColumn Header="Actions" Width="560">
+                    <DataGridTemplateColumn Header="Actions" Width="420">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
                                     <Button Content="View / Edit" Click="ViewUser_Click" Tag="{Binding Id}" MinWidth="92" Padding="10,5" Margin="0,0,6,0" BorderThickness="0" Cursor="Hand" Background="#1E40AF" Foreground="White"/>
                                     <Button Content="{Binding IsActive, Converter={StaticResource ActiveToButtonLabelConverter}}" Click="ToggleStatus_Click" Tag="{Binding Id}" MinWidth="118" Padding="10,5" Margin="0,0,6,0" BorderThickness="0" Cursor="Hand" Foreground="White" Background="{Binding IsActive, Converter={StaticResource ActiveToActionBrushConverter}}"/>
-                                    <Button Content="Reset Password" Click="ResetPassword_Click" Tag="{Binding Id}" MinWidth="126" Padding="10,5" Margin="0,0,6,0" BorderThickness="0" Cursor="Hand" Background="#334155" Foreground="White"/>
-                                    <Button Content="Change Permission" Click="ViewUser_Click" Tag="{Binding Id}" MinWidth="150" Padding="10,5" BorderThickness="0" Cursor="Hand" Background="#059669" Foreground="White"/>
+                                    <Button Content="Delete Account" Click="DeleteUser_Click" Tag="{Binding Id}" MinWidth="120" Padding="10,5" BorderThickness="0" Cursor="Hand" Background="#B91C1C" Foreground="White"/>
                                 </StackPanel>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>

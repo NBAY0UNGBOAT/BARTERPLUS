@@ -6,14 +6,22 @@ namespace BarterPOS.Services
 
         private static ICustomerRepository CreateRepository()
         {
-            MongoSettings mongoSettings = AppConfig.GetMongoSettings();
-
-            if (string.IsNullOrWhiteSpace(mongoSettings.ConnectionString))
+            try
             {
+                MongoSettings mongoSettings = AppConfig.GetMongoSettings();
+
+                if (string.IsNullOrWhiteSpace(mongoSettings.ConnectionString))
+                {
+                    return new InMemoryCustomerRepository();
+                }
+
+                return new MongoCustomerRepository(mongoSettings.ConnectionString, mongoSettings.DatabaseName);
+            }
+            catch (System.Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Customer repository fallback: {ex.Message}");
                 return new InMemoryCustomerRepository();
             }
-
-            return new MongoCustomerRepository(mongoSettings.ConnectionString, mongoSettings.DatabaseName);
         }
     }
 }

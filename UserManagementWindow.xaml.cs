@@ -118,6 +118,49 @@ namespace BarterPOS
             OpenUserDetails(userId);
         }
 
+        private void DeleteUser_Click(object sender, RoutedEventArgs e)
+        {
+            int userId = (int)((Button)sender).Tag;
+            DeleteUser(userId);
+        }
+
+        private void DeleteUser(int userId)
+        {
+            var user = UserStore.Repository.GetById(userId);
+
+            if (user == null)
+            {
+                MessageBox.Show("User not found.", "Delete Account", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            if (user.Id == Session.CurrentUser?.Id)
+            {
+                MessageBox.Show("You cannot delete your own signed-in account.", "Delete Account", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            MessageBoxResult confirm = MessageBox.Show(
+                $"Delete account '{user.Username}'?",
+                "Delete Account",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+
+            if (confirm != MessageBoxResult.Yes)
+            {
+                return;
+            }
+
+            string performedBy = Session.CurrentUser?.Username ?? "Unknown";
+            if (!UserStore.Repository.DeleteUser(userId, performedBy, out string error))
+            {
+                MessageBox.Show(error, "Delete Account", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            LoadData();
+        }
+
         private void Logout_Click(object sender, RoutedEventArgs e)
         {
             Session.CurrentUser = null;

@@ -148,6 +148,22 @@ namespace BarterPOS.Services
             return result;
         }
 
+        public static int ClearPending()
+        {
+            lock (FileLock)
+            {
+                var transactions = LoadAll();
+                int removedCount = transactions.RemoveAll(t => !t.IsSynced);
+
+                if (removedCount > 0)
+                {
+                    SaveAll(transactions);
+                }
+
+                return removedCount;
+            }
+        }
+
         public static bool RefundItems(
             SaleTransaction transaction,
             List<SaleLineItem> refundedItems)

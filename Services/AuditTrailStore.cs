@@ -166,11 +166,6 @@ namespace BarterPOS.Services
         {
             error = string.Empty;
 
-            if (!MongoDatabaseFactory.CanAttemptSync(out error))
-            {
-                return false;
-            }
-
             if (!MongoDatabaseFactory.TryCreateDatabase(out IMongoDatabase? database, out error) || database == null)
             {
                 return false;
@@ -185,13 +180,11 @@ namespace BarterPOS.Services
 
                 collection.Indexes.CreateOne(idIndex);
                 collection.ReplaceOne(e => e.Id == entry.Id, entry, new ReplaceOptions { IsUpsert = true });
-                MongoDatabaseFactory.MarkSyncSuccess();
                 return true;
             }
             catch (Exception ex)
             {
                 error = ex.Message;
-                MongoDatabaseFactory.MarkSyncFailure();
                 return false;
             }
         }

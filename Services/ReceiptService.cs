@@ -68,6 +68,11 @@ namespace BarterPOS.Services
                 AppendTotalLine(sb, "Deduction", $"-{transaction.ManualDeduction:C}");
             }
 
+            if (transaction.LoyaltyCreditRedeemed > 0)
+            {
+                AppendTotalLine(sb, "Loyalty Used", transaction.LoyaltyCreditRedeemed.ToString("C"));
+            }
+
             AppendTotalLine(sb, "TOTAL", transaction.NetAmount.ToString("C"));
             AppendTotalLine(sb, "Payment", transaction.PaymentMethod);
             AppendTotalLine(sb, "Amount Paid", transaction.AmountPaid.ToString("C"));
@@ -82,6 +87,11 @@ namespace BarterPOS.Services
             if (!string.IsNullOrWhiteSpace(store.ReceiptFooter))
             {
                 AppendCentered(sb, store.ReceiptFooter);
+            }
+
+            if (transaction.LoyaltyPointsEarned > 0)
+            {
+                AppendCentered(sb, $"Loyalty earned: {transaction.LoyaltyPointsEarned:N2}");
             }
 
             AppendCentered(sb, transaction.IsSynced ? "Synced" : "Saved offline - pending sync");

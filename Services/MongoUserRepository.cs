@@ -35,19 +35,44 @@ namespace BarterPOS.Services
             _users.Find(u => u.UsernameKey == NormalizeUsername(username) || u.Username == username)
                 .FirstOrDefault();
 
+        private User? GetByEmployeeId(string employeeId) =>
+            _users.Find(u => u.EmployeeIdKey == NormalizeEmployeeId(employeeId) || u.EmployeeID == employeeId)
+                .FirstOrDefault();
+
         public User? GetById(int id) =>
             _users.Find(u => u.Id == id)
                 .FirstOrDefault();
+
+        public string GetNextEmployeeId()
+        {
+            int nextNumber = _users.Find(FilterDefinition<User>.Empty)
+                .ToList()
+                .Select(user => TryParseEmployeeNumber(user.EmployeeID))
+                .DefaultIfEmpty(0)
+                .Max() + 1;
+
+            return FormatEmployeeId(nextNumber);
+        }
 
         public bool Register(User newUser, string plainPassword, out string error)
         {
             error = string.Empty;
             newUser.Username = newUser.Username.Trim();
+            newUser.EmployeeID = string.IsNullOrWhiteSpace(newUser.EmployeeID)
+                ? GetNextEmployeeId()
+                : newUser.EmployeeID.Trim();
             newUser.UsernameKey = NormalizeUsername(newUser.Username);
+            newUser.EmployeeIdKey = NormalizeEmployeeId(newUser.EmployeeID);
 
             if (GetByUsername(newUser.Username) != null)
             {
                 error = "That username is already taken.";
+                return false;
+            }
+
+            if (GetByEmployeeId(newUser.EmployeeID) != null)
+            {
+                error = "That employee ID is already in use.";
                 return false;
             }
 
@@ -63,7 +88,9 @@ namespace BarterPOS.Services
             }
             catch (MongoWriteException ex) when (ex.WriteError.Category == ServerErrorCategory.DuplicateKey)
             {
-                error = "That username is already taken.";
+                error = ex.Message.Contains("EmployeeIdKey", StringComparison.OrdinalIgnoreCase)
+                    ? "That employee ID is already in use."
+                    : "That username is already taken.";
                 return false;
             }
         }
@@ -182,13 +209,56 @@ namespace BarterPOS.Services
                 return false;
             }
 
+            string trimmedEmployeeId = updatedUser.EmployeeID.Trim();
+            string employeeIdKey = NormalizeEmployeeId(trimmedEmployeeId);
+
+            var existingEmployeeIdUser = _users.Find(u =>
+                    u.Id != updatedUser.Id &&
+                    (u.EmployeeIdKey == employeeIdKey || u.EmployeeID == trimmedEmployeeId))
+                .FirstOrDefault();
+
+            if (existingEmployeeIdUser != null)
+            {
+                error = "That employee ID is already in use.";
+                return false;
+            }
+
             _users.UpdateOne(u => u.Id == updatedUser.Id, Builders<User>.Update
-                .Set(u => u.EmployeeID, updatedUser.EmployeeID.Trim())
+                .Set(u => u.EmployeeID, trimmedEmployeeId)
+                .Set(u => u.EmployeeIdKey, employeeIdKey)
                 .Set(u => u.FullName, updatedUser.FullName.Trim())
                 .Set(u => u.Email, updatedUser.Email.Trim())
                 .Set(u => u.ContactNumber, updatedUser.ContactNumber.Trim())
                 .Set(u => u.LastActivity, "Account Information Updated"));
             AddAuditLog(user, "Updated Account Information", performedBy);
+            return true;
+        }
+
+        public bool DeleteUser(int userId, string performedBy, out string error)
+        {
+            error = string.Empty;
+            var user = GetById(userId);
+
+            if (user == null)
+            {
+                error = "User not found.";
+                return false;
+            }
+
+            if (user.Role == "Admin" && _users.CountDocuments(u => u.Role == "Admin") <= 1)
+            {
+                error = "You cannot delete the last admin account.";
+                return false;
+            }
+
+            DeleteResult result = _users.DeleteOne(u => u.Id == userId);
+            if (result.DeletedCount == 0)
+            {
+                error = "User not found.";
+                return false;
+            }
+
+            AddAuditLog(user, "Deleted Account", performedBy);
             return true;
         }
 
@@ -207,8 +277,12 @@ namespace BarterPOS.Services
             var usernameIndex = new CreateIndexModel<User>(
                 Builders<User>.IndexKeys.Ascending(u => u.UsernameKey),
                 new CreateIndexOptions { Unique = true });
+            var employeeIdIndex = new CreateIndexModel<User>(
+                Builders<User>.IndexKeys.Ascending(u => u.EmployeeIdKey),
+                new CreateIndexOptions { Unique = true });
 
             _users.Indexes.CreateOne(usernameIndex);
+            _users.Indexes.CreateOne(employeeIdIndex);
             _auditLog.Indexes.CreateOne(new CreateIndexModel<AuditLogEntry>(
                 Builders<AuditLogEntry>.IndexKeys.Descending(a => a.Timestamp)));
         }
@@ -222,6 +296,15 @@ namespace BarterPOS.Services
                 _users.UpdateOne(
                     u => u.Id == user.Id,
                     Builders<User>.Update.Set(u => u.UsernameKey, NormalizeUsername(user.Username)));
+            }
+
+            var usersMissingEmployeeIdKey = _users.Find(u => u.EmployeeIdKey == null || u.EmployeeIdKey == string.Empty).ToList();
+
+            foreach (var user in usersMissingEmployeeIdKey)
+            {
+                _users.UpdateOne(
+                    u => u.Id == user.Id,
+                    Builders<User>.Update.Set(u => u.EmployeeIdKey, NormalizeEmployeeId(user.EmployeeID)));
             }
         }
 
@@ -269,6 +352,26 @@ namespace BarterPOS.Services
 
         private static string NormalizeUsername(string username) =>
             username.Trim().ToLowerInvariant();
+
+        private static string NormalizeEmployeeId(string employeeId) =>
+            employeeId.Trim().ToUpperInvariant();
+
+        private static int TryParseEmployeeNumber(string employeeId)
+        {
+            string normalized = NormalizeEmployeeId(employeeId);
+
+            if (!normalized.StartsWith("EMP-"))
+            {
+                return 0;
+            }
+
+            return int.TryParse(normalized.Substring(4), out int number)
+                ? number
+                : 0;
+        }
+
+        private static string FormatEmployeeId(int number) =>
+            $"EMP-{number:D4}";
 
         private void AddAuditLog(User user, string action, string performedBy)
         {
